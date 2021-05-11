@@ -7,7 +7,7 @@ from CNN import ConvClassificationNet
 from FC import DenseClassificationNet
 
 
-class HybridNet(nn.Module):
+class AuxiliaryNet(nn.Module):
 
     '''   
     UTILIZE SOFTMAX DISTRIBUTIONS AS INPUT TO FULLY CONNECTED NETWORK
@@ -22,7 +22,7 @@ class HybridNet(nn.Module):
     '''
 
     def __init__(self):
-        super(HybridNet, self).__init__()
+        super(AuxiliaryNet, self).__init__()
         self.convclassnet = ConvClassificationNet()
         self.denseclassnet = DenseClassificationNet()
        
@@ -31,4 +31,4 @@ class HybridNet(nn.Module):
         digit1, digit2 = x.split(split_size = 1, dim = 1)
         digit1  = self.convclassnet(digit1)
         digit2  = self.convclassnet(digit2)
-        return self.denseclassnet(F.conv_transpose1d(digit1, digit2))
+        return self.denseclassnet(F.conv_transpose1d(digit1, digit2)), digit1, digit2
