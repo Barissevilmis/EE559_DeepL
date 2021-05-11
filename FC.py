@@ -4,7 +4,7 @@ from torch.nn import functional as F
 from torch import optim
 
 
-class FullyConnNet(nn.Module):
+class DenseNet(nn.Module):
 
     '''   
     (Operations)                                    (Input Size)
@@ -20,7 +20,7 @@ class FullyConnNet(nn.Module):
     '''
 
     def __init__(self):
-        super(ConvNet, self).__init__()
+        super(DenseNet, self).__init__()
         self.fc1 = nn.Linear(392, 256) 
         self.bn1 = nn.BatchNorm1d(256)
         self.dropout1 = nn.Dropout(0.4)
