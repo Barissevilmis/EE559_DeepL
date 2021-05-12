@@ -7,6 +7,7 @@ from torch import optim
 class DenseNet(nn.Module):
 
     '''   
+    (-) Initialize with Xavier initialization(Fully Connected Layers) 
     (Operations)                                    (Input Size)
     -------------------------------------------------------------
     Initial input :                                  2 x 14 x 14 -> 392 x 1
@@ -30,6 +31,11 @@ class DenseNet(nn.Module):
         self.fc3 = nn.Linear(128, 64)  
         self.bn3 = nn.BatchNorm1d(64)
         self.fc4 = nn.Linear(64, 2)
+
+        torch.nn.init.xavier_uniform_(self.fc1.weight)
+        torch.nn.init.xavier_uniform_(self.fc2.weight)
+        torch.nn.init.xavier_uniform_(self.fc3.weight)
+        torch.nn.init.xavier_uniform_(self.fc4.weight)
        
    
     def forward(self, x):
@@ -45,6 +51,7 @@ class DenseNet(nn.Module):
 class DenseClassificationNet(nn.Module):
 
     '''   
+    (-) Initialize with Xavier initialization(Fully Connected Layers) 
     (Operations)                                    (Input Size)
     -------------------------------------------------------------
     Initial input :                                  19 x 1
@@ -64,6 +71,10 @@ class DenseClassificationNet(nn.Module):
         self.bn2 = nn.BatchNorm1d(32)
         self.dropout2 = nn.Dropout(0.2)
         self.fc3 = nn.Linear(32, 2)
+
+        torch.nn.init.xavier_uniform_(self.fc1.weight)
+        torch.nn.init.xavier_uniform_(self.fc2.weight)
+        torch.nn.init.xavier_uniform_(self.fc3.weight)
        
    
     def forward(self, x):

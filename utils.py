@@ -93,7 +93,7 @@ def train_model(**model_hyperparams):
 
     # Generate dataset
     (train_input, train_target, train_classes), (test_input, test_target, test_classes) = generate_dataset(model_hyperparams["sample_size"])
-    
+
     # Preprocess dataset
     train_dataset, test_dataset = preprocess_dataset(train_input, train_target, train_classes, test_input, test_target, test_classes)
 
@@ -110,7 +110,7 @@ def train_model(**model_hyperparams):
     criterion.to(device)
 
     #Auxiliary loss: Get label digits and use them with auxiliary network
-    train_digit_1, train digit_2 = model_hyperparams['train_class'].split(size = 1, dim = 1)
+    train_digit_1, train_digit_2 = model_hyperparams['train_class'].split(size = 1, dim = 1)
     
     #Lists for train loss and accuracy values
     train_losses = list()
@@ -124,7 +124,7 @@ def train_model(**model_hyperparams):
     for epoch in range(model_hyperparams["epochs"]):
         epoch_loss = 0
         
-        for batch_num, batch in enumerate(train_loader):
+        for batch_num, batch in enumerate(train_dataloader):
 
 
     

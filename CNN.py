@@ -6,13 +6,14 @@ from torch import optim
 
 class ConvNet(nn.Module):
 
-    '''   
+    '''
+    (-) Initialize with Xavier initialization(Convolutional and Fully Connected Layers)   
     (Operations)                                    (Input Size)
     -------------------------------------------------------------
     Initial input :                                  2 x 14 x 14
     Convolutional Layer with ReLU(1) :               32 x 12 x 12 
     MaxPool2D(Kernel size = 2 & Stride = 2)(1) :     32 x 6 x 6  
-    BatchNorm2d(1) + Dropout(Probability = 0.4)(1) : 32 x 6 x 6
+    BatchNorm2d(1) + Dropout(Probability = 0.2)(1) : 32 x 6 x 6
     Convolutional Layer with ReLU(2) :               64 x 4 x 4 
     MaxPool2D(Kernel size = 2 & Stride = 2)(2) :     64 x 2 x 2  
     BatchNorm2d(2) + Dropout(Probability = 0.2)(2) : 64 x 2 x 2
@@ -24,12 +25,17 @@ class ConvNet(nn.Module):
         super(ConvNet, self).__init__()
         self.conv1 = nn.Conv2d(2, 32, kernel_size=3) 
         self.bn1 = nn.BatchNorm2d(32)
-        self.dropout1 = nn.Dropout(0.4)
+        self.dropout1 = nn.Dropout(0.2)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3)
         self.bn2 = nn.BatchNorm2d(64)
         self.dropout2 = nn.Dropout(0.2)
         self.fc1 = nn.Linear(256, 128)  
         self.fc2 = nn.Linear(128, 2)
+
+        torch.nn.init.xavier_uniform_(self.conv1.weight)
+        torch.nn.init.xavier_uniform_(self.conv2.weight)
+        torch.nn.init.xavier_uniform_(self.fc1.weight)
+        torch.nn.init.xavier_uniform_(self.fc2.weight)
        
    
     def forward(self, x):
@@ -43,12 +49,13 @@ class ConvNet(nn.Module):
 class ConvClassificationNet(nn.Module):
 
     '''   
+    (-) Initialize with Xavier initialization(Convolutional and Fully Connected Layers) 
     (Operations)                                    (Input Size)
     -------------------------------------------------------------
     Initial input :                                  1 x 14 x 14
     Convolutional Layer with ReLU(1) :               32 x 12 x 12 
     MaxPool2D(Kernel size = 2 & Stride = 2)(1) :     32 x 6 x 6  
-    BatchNorm2d(1) + Dropout(Probability = 0.4)(1) : 32 x 6 x 6
+    BatchNorm2d(1) + Dropout(Probability = 0.2)(1) : 32 x 6 x 6
     Convolutional Layer with ReLU(2) :               64 x 4 x 4 
     MaxPool2D(Kernel size = 2 & Stride = 2)(2) :     64 x 2 x 2  
     BatchNorm2d(2) + Dropout(Probability = 0.2)(2) : 64 x 2 x 2
@@ -60,12 +67,17 @@ class ConvClassificationNet(nn.Module):
         super(ConvNet, self).__init__()
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3) 
         self.bn1 = nn.BatchNorm2d(32)
-        self.dropout1 = nn.Dropout(0.4)
+        self.dropout1 = nn.Dropout(0.2)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3)
         self.bn2 = nn.BatchNorm2d(64)
         self.dropout2 = nn.Dropout(0.2)
         self.fc1 = nn.Linear(256, 128)  
         self.fc2 = nn.Linear(128, 10)
+
+        torch.nn.init.xavier_uniform_(self.conv1.weight)
+        torch.nn.init.xavier_uniform_(self.conv2.weight)
+        torch.nn.init.xavier_uniform_(self.fc1.weight)
+        torch.nn.init.xavier_uniform_(self.fc2.weight)
        
    
     def forward(self, x):
