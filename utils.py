@@ -176,10 +176,11 @@ def tune_model(model, criterion, epochs, **model_hyperparams):
     '''
 
     best_hyperparams = {
-    "lr": 0,
-    "weight_decay": 0,
-    "batch_size": 0,
-    "aux_param": 0,
+        "lr": 0,
+        "weight_decay": 0,
+        "batch_size": 0,
+        "aux_param": 0,
+    }
 
     # Generate dataset
     (train_input, train_target, train_classes), (test_input, test_target,
@@ -195,8 +196,7 @@ def tune_model(model, criterion, epochs, **model_hyperparams):
 
     device = device_choice()
     model.to(device)
-    criterion.to(device) 
-}
+    criterion.to(device)
 
 
 def stats_model():
