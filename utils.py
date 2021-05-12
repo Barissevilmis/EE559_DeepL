@@ -107,23 +107,48 @@ def train_model(**model_hyperparams):
     device = device_choice()
     model.to(device)
     criterion.to(device)
-
-    #Auxiliary loss: Get label digits and use them with auxiliary network
-    train_digit_1, train_digit_2 = model_hyperparams['train_class'].split(size = 1, dim = 1)
     
     #Lists for train loss and accuracy values
     train_losses = list()
     train_acc = list()
 
-    #Scheduler used for learning rate decay: Every 30 epochs lr = lr * gamma
+    #Scheduler used for learning rate decay: Every 25 epochs lr = lr * gamma
     optimizer = optim.Adam(model.parameters(), lr = model_hyperparams["lr"], weight_decay=1e-5)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.1)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=25, gamma=0.1)
 
 
     for epoch in range(model_hyperparams["epochs"]):
         epoch_loss = 0
-        
-        for batch_num, batch in enumerate(train_dataloader):
+        for batch_id, train_batch in enumerate(train_dataloader):
+            #Auxiliary loss network
+            if type(model).__name__ == "AuxiliaryNet":
+                optimizer.zero_grad()
+                pred, d1, d2 = model(train_batch['input'])
+
+                #Actual objective loss
+                loss_main = criterion(pred, train_batch['target'])
+                #Auxiliary losses
+                loss_aux_1 = criterion(d1, train_batch['class1'])
+                loss_aux_2 = criterion(d1, train_batch['class2'])
+                #Final loss is a weighted sum of all losses
+                loss = model_hyperparams['aux_param1'] * loss_main + model_hyperparams['aux_param2'] * loss_aux_1 + model_hyperparams['aux_param2'] * loss_aux_2 
+
+                loss.backward()
+                optimizer.step()
+
+            #Convolutional or Dense network
+            else:
+                optimizer.zero_grad()
+                pred = model(train_batch['input'])
+                loss = criterion(pred, train_batch['target'])
+                loss.backward()
+                optimizer.step()
+                #Decay learning rate with scheduler
+            epoch_loss += loss.item()
+            print("Epoch", str(epoch), ", Batch", str(batch_id),"loss:", str(loss.item()), "Epoch Loss Summation:",str(epoch_loss))
+
+        scheduler.step()
+        print("Epoch", str(epoch), ", Current learning rate:", scheduler.get_lr())   
 
 
     

@@ -13,8 +13,8 @@ class DataSet(Dataset):
         self.classes = classes
 
         self.data = self.data.float()
-        self.target  = self.target.float()
-        self.classes = self.classes.float()
+        self.target  = self.target.long()
+        self.classes = self.classes.long()
 
         if req_grad:
             self.data.requires_grad = True
@@ -31,6 +31,9 @@ class DataSet(Dataset):
         self.target = self.target.to(self.device)
         self.classes = self.classes.to(self.device)
 
+        #Auxiliary loss: Get label digits and use them with auxiliary network
+        self.class1, self.class2 = self.classes.split(size = 1, dim = 1)
+
     def __len__(self):
         print("Input shape: ", self.data.shape)
         print("Target shape: ", self.target.shape)
@@ -39,7 +42,7 @@ class DataSet(Dataset):
 
     def __getitem__(self, ind):
 
-        return {'input': self.data[ind], 'target': self.target[ind], 'classes':self.classes[ind]}
+        return {'input': self.data[ind], 'target': self.target[ind], 'class1':self.class1[ind], 'class2':self.class2[ind]}
 
     def to_device(self):
         if torch.cuda.is_available():
