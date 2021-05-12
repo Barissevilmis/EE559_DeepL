@@ -93,13 +93,13 @@ def train_model(**model_hyperparams):
 
     # Generate dataset
     (train_input, train_target, train_classes), (test_input, test_target, test_classes) = generate_dataset(model_hyperparams["sample_size"])
+    
     # Preprocess dataset
-    (train_input, train_target, train_classes), (test_input, test_target, test_classes) = preprocess_dataset(
-        (train_input, train_target, train_classes), (test_input, test_target, test_classes))
+    train_dataset, test_dataset = preprocess_dataset(train_input, train_target, train_classes, test_input, test_target, test_classes)
 
     #Use dataloader for shuffling and utilizing data
-    train_loader = utils.data.DataLoader(train_input, batch_size = model_hyperparams["batch_size"], shuffle = True)
-    test_loader = utils.data.DataLoader(test_input, batch_size = model_hyperparams["batch_size"], shuffle = True, drop_last = False)
+    train_dataloader = utils.data.DataLoader(train_dataset, batch_size = model_hyperparams["batch_size"], shuffle = True)
+    test_dataloader = utils.data.DataLoader(test_dataset, batch_size = model_hyperparams["batch_size"], shuffle = True)
 
     #Send model, optimizer and criterion to corresponding device
     model = model_hyperparams['model']
