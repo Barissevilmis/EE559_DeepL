@@ -38,8 +38,7 @@ def generate_dataset(sample_size=1000):
     Generate the dataset from prologue file
     '''
 
-    train_input, train_target, train_classes, test_input, test_target, test_classes = prologue.generate_pair_sets(
-        sample_size)
+    train_input, train_target, train_classes, test_input, test_target, test_classes = prologue.generate_pair_sets(sample_size)
     return (train_input, train_target, train_classes), (test_input, test_target, test_classes)
 
 
@@ -52,9 +51,9 @@ def preprocess_dataset(train_input, train_target, train_classes, test_input, tes
     train_input = normalize_input(train_input)
     test_input = normalize_input(test_input)
 
+    #Load into DataSet class
     train_dataset = DataSet(train_input, train_target, train_classes, True)
     test_dataset = DataSet(test_input, test_target, test_classes, False)
-
 
     return train_dataset, test_dataset
 

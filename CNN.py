@@ -85,5 +85,5 @@ class ConvClassificationNet(nn.Module):
         x = self.dropout1(self.bn1(x))
         x = F.max_pool2d(F.relu(self.conv2(x)), kernel_size=2, stride=2)
         x = self.dropout2(self.bn2(x))
-        x = F.relu(self.fc1(x.view(-1, 256)))))
+        x = F.relu(self.fc1(x.view(-1, 256)))
         return F.softmax(self.fc2(x), dim = 1)
