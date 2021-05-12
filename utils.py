@@ -170,10 +170,33 @@ def train_model(model, criterion, epochs=100, **model_hyperparams):
     return train_losses, train_acc, test_acc
 
 
-def tune_model(**model_hyperparams):
+def tune_model(model, criterion, epochs, **model_hyperparams):
     '''
-    This function executes a given model for various hyperparameters
+    This function executes a given model for various hyperparameters and return best set of parameters
     '''
+
+    best_hyperparams = {
+    "lr": 0,
+    "weight_decay": 0,
+    "batch_size": 0,
+    "aux_param": 0,
+
+    # Generate dataset
+    (train_input, train_target, train_classes), (test_input, test_target,
+                                                 test_classes) = generate_dataset(model_hyperparams["sample_size"])
+
+    # Preprocess dataset
+    train_dataset, test_dataset = preprocess_dataset(
+        train_input, train_target, train_classes, test_input, test_target, test_classes)
+
+    # Use dataloader for shuffling and utilizing data
+    train_dataloader = utils.data.DataLoader(
+        train_dataset, batch_size=model_hyperparams["batch_size"], shuffle=True)
+
+    device = device_choice()
+    model.to(device)
+    criterion.to(device) 
+}
 
 
 def stats_model():
