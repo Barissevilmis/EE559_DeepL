@@ -58,7 +58,7 @@ def preprocess_dataset(train_input, train_target, train_classes, test_input, tes
     return train_dataset, test_dataset
 
 
-def compute_nb_errors(model, data_input, data_target, batch_size=128):
+def compute_nb_errors(model, data_input, data_target, batch_size=100):
     '''
     Calculate the number of errors given a model, data input, data target and mini batch size.
     Taken from practical exercises
@@ -97,8 +97,7 @@ def train_model(**model_hyperparams):
     train_dataset, test_dataset = preprocess_dataset(train_input, train_target, train_classes, test_input, test_target, test_classes)
 
     #Use dataloader for shuffling and utilizing data
-    train_dataloader = utils.data.DataLoader(train_dataset, batch_size = model_hyperparams["batch_size"], shuffle = True)
-    test_dataloader = utils.data.DataLoader(test_dataset, batch_size = model_hyperparams["batch_size"], shuffle = True)
+    train_dataloader = utils.data.DataLoader(train_dataset, batch_size = model_hyperparams["train_batch_size"], shuffle = True)
 
     #Send model, optimizer and criterion to corresponding device
     model = model_hyperparams['model']
@@ -111,12 +110,13 @@ def train_model(**model_hyperparams):
     #Lists for train loss and accuracy values
     train_losses = list()
     train_acc = list()
+    test_acc = list()
 
     #Scheduler used for learning rate decay: Every 25 epochs lr = lr * gamma
     optimizer = optim.Adam(model.parameters(), lr = model_hyperparams["lr"], weight_decay=1e-5)
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=25, gamma=0.1)
 
-
+    model.train(True)
     for epoch in range(model_hyperparams["epochs"]):
         epoch_loss = 0
         for batch_id, train_batch in enumerate(train_dataloader):
@@ -143,13 +143,24 @@ def train_model(**model_hyperparams):
                 loss = criterion(pred, train_batch['target'])
                 loss.backward()
                 optimizer.step()
-                #Decay learning rate with scheduler
+
             epoch_loss += loss.item()
-            print("Epoch", str(epoch), ", Batch", str(batch_id),"loss:", str(loss.item()), "Epoch Loss Summation:",str(epoch_loss))
+            print("Epoch", str(epoch), ", Batch", str(batch_id)," train loss:", str(loss.item()), "Epoch Loss Summation:",str(epoch_loss))
 
+        #Decay learning rate with scheduler
         scheduler.step()
-        print("Epoch", str(epoch), ", Current learning rate:", scheduler.get_lr())   
+        print("Epoch", str(epoch), ", Current learning rate:", scheduler.get_lr())
+        train_losses.append(epoch_loss)
 
+        train_error = compute_nb_errors(model, train_dataset.get_data(), train_dataset.get_target(), batch_size=100)
+        train_acc.append(1-(train_error/train_target.shape[0]))
+
+        test_error = compute_nb_errors(model, test_dataset.get_data(), test_dataset.get_target(), batch_size=100)
+        test_acc.append(1-(test_error/test_target.shape[0]))
+
+    model.train(False)
+
+    return train_losses, train_acc, test_acc
 
     
 

@@ -50,3 +50,12 @@ class DataSet(Dataset):
         else:
             return torch.device("cpu")
 
+    def get_data(self):
+        return self.data
+    
+    def get_target(self):
+        return self.target
+    
+    def get_classes(self):
+        return self.classes
+
