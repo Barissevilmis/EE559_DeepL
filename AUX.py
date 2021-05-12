@@ -20,7 +20,7 @@ class AuxiliaryNet(nn.Module):
     Classify with Dense Network:                     19 x 1 -> 2 x 1
     
     '''
-
+    
     def __init__(self):
         super(AuxiliaryNet, self).__init__()
         self.convclassnet = ConvClassificationNet()
