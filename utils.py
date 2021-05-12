@@ -154,7 +154,8 @@ def train_model(model, criterion, epochs=100, **model_hyperparams):
 
         # Decay learning rate with scheduler
         scheduler.step()
-        print("Epoch", str(epoch), ", Current learning rate:", scheduler.get_lr())
+        print("Epoch", str(epoch), ", Current learning rate:",
+              scheduler.get_last_lr())
         train_losses.append(epoch_loss)
 
         train_error = compute_nb_errors(
@@ -199,8 +200,24 @@ def tune_model(model, criterion, epochs, **model_hyperparams):
     criterion.to(device)
 
 
-def stats_model():
-    pass
+def avg_scores(model, criterion, epochs, **model_hyperparams):
+    '''
+    From the train model, calculate the average scores per epoch
+    '''
+
+    train_losses, train_acc, test_acc = train_model(
+        model, criterion, epochs, **model_hyperparams)
+
+    train_avg = train_acc_avg = test_acc_avg = 0
+    for i in range(epochs):
+        train_avg += train_losses[i]
+        train_acc_avg += train_acc[i]
+        test_acc_avg += test_acc[i]
+    train_avg /= epochs
+    train_acc_avg /= epochs
+    test_acc_avg /= epochs
+
+    return train_avg, train_acc_avg, test_acc_avg
 
 
 def plot_train_test(loss, accuracy):
