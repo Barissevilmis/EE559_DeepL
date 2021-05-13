@@ -235,7 +235,7 @@ def tune_model(model, criterion, epochs=100, rounds=15, **model_hyperparams):
 
                         best_hyperparams["lr"] = lr_
                         best_hyperparams["weight_decay"] = wd_
-                        best_hyperparams["batch_size"] = bs_
+                        best_hyperparams["batch_size"] = model_hyperparams["batch_size"]
                         best_hyperparams["aux_param"] = ap_
 
             else:
@@ -284,7 +284,7 @@ def tune_model(model, criterion, epochs=100, rounds=15, **model_hyperparams):
 
                     best_hyperparams["lr"] = lr_
                     best_hyperparams["weight_decay"] = wd_
-                    best_hyperparams["batch_size"] = bs_
+                    best_hyperparams["batch_size"] = model_hyperparams["batch_size"]
                     best_hyperparams["aux_param"] = ap_
 
     return best_hyperparams, best_train_loss, best_train_acc, best_val_acc
