@@ -118,8 +118,8 @@ def train_model(model, train_dataset, val_dataset, criterion, epochs=100, **mode
                 # Actual objective loss
                 loss_main = criterion(pred, train_batch['target'])
                 # Auxiliary losses
-                loss_aux_1 = criterion(d1, train_batch['class1'])
-                loss_aux_2 = criterion(d2, train_batch['class2'])
+                loss_aux_1 = criterion(d1, train_batch['class1'].squeeze())
+                loss_aux_2 = criterion(d2, train_batch['class2'].squeeze())
                 # Final loss is a weighted sum of all losses
                 loss = model_hyperparams['aux_param'] * loss_main + (1-model_hyperparams['aux_param'])/2 * \
                     loss_aux_1 + \
