@@ -31,4 +31,5 @@ class AuxiliaryNet(nn.Module):
         digit1, digit2 = x.split(split_size = 1, dim = 1)
         digit1  = self.convclassnet(digit1)
         digit2  = self.convclassnet(digit2)
-        return self.denseclassnet(F.conv_transpose1d(digit1, digit2)), digit1, digit2
+
+        return self.denseclassnet(torch.stack(digit1,digit2, dim = 1)), digit1, digit2
