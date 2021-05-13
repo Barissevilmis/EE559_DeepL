@@ -163,7 +163,7 @@ def train_model(model, train_dataset, val_dataset, criterion, epochs=100, **mode
     return train_losses, train_acc, val_acc
 
 
-def tune_model(model, criterion, epochs, rounds = 15, **model_hyperparams):
+def tune_model(model, criterion, epochs, rounds=15, **model_hyperparams):
     '''
     This function executes a given model for various hyperparameters and return best set of parameters
     '''
@@ -179,26 +179,26 @@ def tune_model(model, criterion, epochs, rounds = 15, **model_hyperparams):
     model.to(device)
     criterion.to(device)
 
-    #Tune learning rate
+    # Tune learning rate
     for lr in model_hyperparams["lr"]:
-        
-        #Tune weight decay
+
+        # Tune weight decay
         for wd in model_hyperparams["weight_decay"]:
-            
-            #Tune batch size
+
+            # Tune batch size
             for bs in model_hyperparams["batch_size"]:
-                
+
                 if type(model).__name__ == "AuxiliaryNet":
-                    
-                    #Tune
+
+                    # Tune
                     for ap in model_hyperparams["aux_params"]:
-                        
-                        #Run with newly generated data for 10+ rounds to be sure if training goes well behaved for new data as well
+
+                        # Run with newly generated data for 10+ rounds to be sure if training goes well behaved for new data as well
                         for rnd in range(rounds):
 
                             # Generate dataset
                             (train_input, train_target, train_classes), (val_input, val_target,
-                                                                        val_classes) = generate_dataset(model_hyperparams["sample_size"])
+                                                                         val_classes) = generate_dataset(model_hyperparams["sample_size"])
 
                             # Preprocess dataset
                             train_dataset, test_dataset = preprocess_dataset(
@@ -208,26 +208,32 @@ def tune_model(model, criterion, epochs, rounds = 15, **model_hyperparams):
                             train_dataloader = utils.data.DataLoader(
                                 train_dataset, batch_size=model_hyperparams["batch_size"], shuffle=True)
 
-                        
 
-def avg_scores(model, criterion, epochs, **model_hyperparams):
+def compute_scores(model, criterion, epochs, **model_hyperparams):
     '''
-    From the train model, calculate the average scores per epoch
+    From the train model, calculate the statistical scores per epoch
     '''
 
-    train_losses, train_acc, test_acc = train_model(
+    train_losses, train_acc, val_acc = train_model(
         model, criterion, epochs, **model_hyperparams)
 
-    train_avg = train_acc_avg = test_acc_avg = 0
-    for i in range(epochs):
-        train_avg += train_losses[i]
-        train_acc_avg += train_acc[i]
-        test_acc_avg += test_acc[i]
-    train_avg /= epochs
-    train_acc_avg /= epochs
-    test_acc_avg /= epochs
+    train_losses_avg =
+    train_losses_std =
+    train_losses_min =
+    train_losses_max =
+    train_losses_median =
 
-    return train_avg, train_acc_avg, test_acc_avg
+    train_acc_avg =
+    train_acc_std =
+    train_acc_min =
+    train_acc_max =
+    train_acc_median =
+
+    val_acc_avg =
+    val_acc_std =
+    val_acc_min =
+    val_acc_max =
+    val_acc_median =
 
 
 def plot_train_test(loss, accuracy):
