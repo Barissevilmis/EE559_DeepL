@@ -1,0 +1,1 @@
+{"lr": 0.05, "weight_decay": 0.0001, "batch_size": 100, "aux_param": 0}
