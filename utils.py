@@ -148,22 +148,22 @@ def train_model(model, train_dataset, val_dataset, criterion, epochs=100, **mode
         scheduler.step()
         print("Epoch", str(epoch), ", Current learning rate:",
               scheduler.get_last_lr())
-        train_losses.append(epoch_loss)
+        train_losses[i] = epoch_loss
 
         train_error = compute_nb_errors(
             model, train_dataset.get_data(), train_dataset.get_target(), batch_size=100)
-        train_acc[epoch] = 1-(train_error/train_target.shape[0])
+        train_acc[epoch] = 1-(train_error/train_dataset.get_size())
 
         val_error = compute_nb_errors(
             model, val_dataset.get_data(), val_dataset.get_target(), batch_size=100)
-        val_acc[epoch] = 1-(val_error/val_target.shape[0])
+        val_acc[epoch] = 1-(val_error/val_dataset.get_size())
 
     model.train(False)
 
     return train_losses, train_acc, val_acc
 
 
-def tune_model(model, criterion, epochs, rounds = 20, **model_hyperparams):
+def tune_model(model, criterion, epochs, rounds = 15, **model_hyperparams):
     '''
     This function executes a given model for various hyperparameters and return best set of parameters
     '''
@@ -175,22 +175,40 @@ def tune_model(model, criterion, epochs, rounds = 20, **model_hyperparams):
         "aux_param": 0,
     }
 
-    # Generate dataset
-    (train_input, train_target, train_classes), (val_input, val_target,
-                                                 val_classes) = generate_dataset(model_hyperparams["sample_size"])
-
-    # Preprocess dataset
-    train_dataset, test_dataset = preprocess_dataset(
-        train_input, train_target, train_classes, test_input, test_target, test_classes)
-
-    # Use dataloader for shuffling and utilizing data
-    train_dataloader = utils.data.DataLoader(
-        train_dataset, batch_size=model_hyperparams["batch_size"], shuffle=True)
-
     device = device_choice()
     model.to(device)
     criterion.to(device)
 
+    #Tune learning rate
+    for lr in model_hyperparams["lr"]:
+        
+        #Tune weight decay
+        for wd in model_hyperparams["weight_decay"]:
+            
+            #Tune batch size
+            for bs in model_hyperparams["batch_size"]:
+                
+                if type(model).__name__ == "AuxiliaryNet":
+                    
+                    #Tune
+                    for ap in model_hyperparams["aux_params"]:
+                        
+                        #Run with newly generated data for 10+ rounds to be sure if training goes well behaved for new data as well
+                        for rnd in range(rounds):
+
+                            # Generate dataset
+                            (train_input, train_target, train_classes), (val_input, val_target,
+                                                                        val_classes) = generate_dataset(model_hyperparams["sample_size"])
+
+                            # Preprocess dataset
+                            train_dataset, test_dataset = preprocess_dataset(
+                                train_input, train_target, train_classes, val_input, val_target, val_classes)
+
+                            # Use dataloader for shuffling and utilizing data
+                            train_dataloader = utils.data.DataLoader(
+                                train_dataset, batch_size=model_hyperparams["batch_size"], shuffle=True)
+
+                        
 
 def avg_scores(model, criterion, epochs, **model_hyperparams):
     '''

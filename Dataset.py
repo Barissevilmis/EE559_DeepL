@@ -46,6 +46,9 @@ class DataSet(Dataset):
 
         return {'input': self.data[ind], 'target': self.target[ind], 'class1': self.class1[ind], 'class2': self.class2[ind]}
 
+    def get_size(self):
+        return self.target.shape[0]
+
     def to_device(self):
         if torch.cuda.is_available():
             return torch.device("cuda")
