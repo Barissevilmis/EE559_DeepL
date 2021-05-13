@@ -86,18 +86,10 @@ def compute_nb_errors(model, data_input, data_target, batch_size=100):
     return nb_data_errors
 
 
-def train_model(model, criterion, epochs=100, **model_hyperparams):
+def train_model(model, train_dataset, val_dataset, criterion, epochs=100, **model_hyperparams):
     '''
     Training model with provided hyperparameters
     '''
-
-    # Generate dataset
-    (train_input, train_target, train_classes), (test_input, test_target,
-                                                 test_classes) = generate_dataset(model_hyperparams["sample_size"])
-
-    # Preprocess dataset
-    train_dataset, test_dataset = preprocess_dataset(
-        train_input, train_target, train_classes, test_input, test_target, test_classes)
 
     # Use dataloader for shuffling and utilizing data
     train_dataloader = utils.data.DataLoader(
@@ -108,9 +100,9 @@ def train_model(model, criterion, epochs=100, **model_hyperparams):
     criterion.to(device)
 
     # Lists for train loss and accuracy values
-    train_losses = list()
-    train_acc = list()
-    test_acc = list()
+    train_losses = torch.zeros(epochs)
+    train_acc = torch.zeros(epochs)
+    val_acc = torch.zeros(epochs)
 
     # Scheduler used for learning rate decay: Every 25 epochs lr = lr * gamma
     optimizer = optim.Adam(
@@ -160,18 +152,18 @@ def train_model(model, criterion, epochs=100, **model_hyperparams):
 
         train_error = compute_nb_errors(
             model, train_dataset.get_data(), train_dataset.get_target(), batch_size=100)
-        train_acc.append(1-(train_error/train_target.shape[0]))
+        train_acc[epoch] = 1-(train_error/train_target.shape[0])
 
-        test_error = compute_nb_errors(
-            model, test_dataset.get_data(), test_dataset.get_target(), batch_size=100)
-        test_acc.append(1-(test_error/test_target.shape[0]))
+        val_error = compute_nb_errors(
+            model, val_dataset.get_data(), val_dataset.get_target(), batch_size=100)
+        val_acc[epoch] = 1-(val_error/val_target.shape[0])
 
     model.train(False)
 
-    return train_losses, train_acc, test_acc
+    return train_losses, train_acc, val_acc
 
 
-def tune_model(model, criterion, epochs, **model_hyperparams):
+def tune_model(model, criterion, epochs, rounds = 20, **model_hyperparams):
     '''
     This function executes a given model for various hyperparameters and return best set of parameters
     '''
@@ -184,8 +176,8 @@ def tune_model(model, criterion, epochs, **model_hyperparams):
     }
 
     # Generate dataset
-    (train_input, train_target, train_classes), (test_input, test_target,
-                                                 test_classes) = generate_dataset(model_hyperparams["sample_size"])
+    (train_input, train_target, train_classes), (val_input, val_target,
+                                                 val_classes) = generate_dataset(model_hyperparams["sample_size"])
 
     # Preprocess dataset
     train_dataset, test_dataset = preprocess_dataset(
