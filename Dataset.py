@@ -37,9 +37,9 @@ class DataSet(Dataset):
         self.class1, self.class2 = self.classes.split(1, dim=1)
 
     def __len__(self):
-        print("Input shape: ", self.data.shape)
-        print("Target shape: ", self.target.shape)
-        print("Classes shape: ", self.classes.shape)
+        #print("Input shape: ", self.data.shape)
+        #print("Target shape: ", self.target.shape)
+        #print("Classes shape: ", self.classes.shape)
         return self.data.shape[0]
 
     def __getitem__(self, ind):
