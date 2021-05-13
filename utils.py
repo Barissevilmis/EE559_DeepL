@@ -148,7 +148,7 @@ def train_model(model, train_dataset, val_dataset, criterion, epochs=100, **mode
         scheduler.step()
         print("Epoch", str(epoch), ", Current learning rate:",
               scheduler.get_last_lr())
-        train_losses[i] = epoch_loss
+        train_losses[epoch] = epoch_loss
 
         train_error = compute_nb_errors(
             model, train_dataset.get_data(), train_dataset.get_target(), batch_size=100)
@@ -175,38 +175,46 @@ def tune_model(model, criterion, epochs, rounds=15, **model_hyperparams):
         "aux_param": 0,
     }
 
-    device = device_choice()
-    model.to(device)
-    criterion.to(device)
-
     # Tune learning rate
-    for lr in model_hyperparams["lr"]:
+    for lr_ in model_hyperparams["lr"]:
 
         # Tune weight decay
-        for wd in model_hyperparams["weight_decay"]:
+        for wd_ in model_hyperparams["weight_decay"]:
 
             # Tune batch size
-            for bs in model_hyperparams["batch_size"]:
+            for bs_ in model_hyperparams["batch_size"]:
 
-                if type(model).__name__ == "AuxiliaryNet":
+                # Tune
+                for ap_ in model_hyperparams["aux_params"]:
 
-                    # Tune
-                    for ap in model_hyperparams["aux_params"]:
+                    avg_train_losses = torch.zeros(epochs)
+                    avg_train_acc = torch.zeros(epochs)
+                    avg_val_acc = torch.zeros(epochs)
+                    # Run with newly generated data for 10+ rounds to be sure if training goes well behaved for new data as well
+                    for rnd in range(rounds):
 
-                        # Run with newly generated data for 10+ rounds to be sure if training goes well behaved for new data as well
-                        for rnd in range(rounds):
+                        # Generate dataset
+                        (train_input, train_target, train_classes), (val_input, val_target,
+                                                                     val_classes) = generate_dataset(model_hyperparams["sample_size"])
 
-                            # Generate dataset
-                            (train_input, train_target, train_classes), (val_input, val_target,
-                                                                         val_classes) = generate_dataset(model_hyperparams["sample_size"])
+                        # Preprocess dataset
+                        train_dataset, val_dataset = preprocess_dataset(
+                            train_input, train_target, train_classes, val_input, val_target, val_classes)
 
-                            # Preprocess dataset
-                            train_dataset, test_dataset = preprocess_dataset(
-                                train_input, train_target, train_classes, val_input, val_target, val_classes)
+                        # Use dataloader for shuffling and utilizing data
+                        train_dataloader = utils.data.DataLoader(
+                            train_dataset, batch_size=model_hyperparams["batch_size"], shuffle=True)
 
-                            # Use dataloader for shuffling and utilizing data
-                            train_dataloader = utils.data.DataLoader(
-                                train_dataset, batch_size=model_hyperparams["batch_size"], shuffle=True)
+                        train_losses, train_acc, val_acc = train_model(
+                            model, train_dataset, val_dataset, criterion, lr=lr_, weight_decay=wd_, batch_size=bs_, aux_param=ap_)
+
+                        avg_train_losses += train_losses
+                        avg_train_acc += avg_train_acc
+                        avg_val_acc += avg_val_acc
+
+                    avg_train_losses /= rounds
+                    avg_train_acc /= rounds
+                    avg_val_acc /= rounds
 
 
 def compute_scores(model, criterion, epochs, **model_hyperparams):
