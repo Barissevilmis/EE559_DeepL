@@ -63,7 +63,7 @@ class ConvClassificationNet(nn.Module):
     '''
 
     def __init__(self):
-        super(ConvNet, self).__init__()
+        super(ConvClassificationNet, self).__init__()
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3)
         self.bn1 = nn.BatchNorm2d(32)
         self.dropout1 = nn.Dropout(0.2)

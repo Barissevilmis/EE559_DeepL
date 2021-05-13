@@ -61,7 +61,7 @@ class DenseClassificationNet(nn.Module):
     '''
 
     def __init__(self):
-        super(DenseNet, self).__init__()
+        super(DenseClassificationNet, self).__init__()
         self.fc1 = nn.Linear(19, 128)
         self.bn1 = nn.BatchNorm1d(128)
         self.dropout1 = nn.Dropout(0.2)
