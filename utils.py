@@ -217,23 +217,53 @@ def compute_scores(model, criterion, epochs, **model_hyperparams):
     train_losses, train_acc, val_acc = train_model(
         model, criterion, epochs, **model_hyperparams)
 
-    train_losses_avg =
-    train_losses_std =
-    train_losses_min =
-    train_losses_max =
-    train_losses_median =
+    train_losses_mean = torch.mean(train_losses).item()
+    train_losses_std = torch.std(train_losses).item()
+    train_losses_min = torch.min(train_losses).item()
+    train_losses_max = torch.max(train_losses).item()
+    train_losses_median = torch.median(train_losses).item()
 
-    train_acc_avg =
-    train_acc_std =
-    train_acc_min =
-    train_acc_max =
-    train_acc_median =
+    train_acc_mean = torch.mean(train_acc).item()
+    train_acc_std = torch.std(train_acc).item()
+    train_acc_min = torch.min(train_acc).item()
+    train_acc_max = torch.max(train_acc).item()
+    train_acc_median = torch.median(train_acc).item()
 
-    val_acc_avg =
-    val_acc_std =
-    val_acc_min =
-    val_acc_max =
-    val_acc_median =
+    val_acc_mean = torch.mean(val_acc).item()
+    val_acc_std = torch.std(val_acc).item()
+    val_acc_min = torch.min(val_acc).item()
+    val_acc_max = torch.max(val_acc).item()
+    val_acc_median = torch.median(val_acc).item()
+
+    train_losses_dict = {
+        "mean": train_losses_mean,
+        "std": train_losses_std,
+        "min": train_losses_min,
+        "max": train_losses_max,
+        "median": train_losses_median
+    }
+
+    train_acc_dict = {
+        "mean": train_acc_mean,
+        "std": train_acc_std,
+        "min": train_acc_min,
+        "max": train_acc_max,
+        "median": train_acc_median,
+    }
+
+    val_acc_dict = {
+        "mean": val_acc_mean,
+        "std": val_acc_std,
+        "min": val_acc_min,
+        "max": val_acc_max,
+        "median": val_acc_median,
+    }
+
+    return {
+        "train_losses": train_losses_dict,
+        "train_acc": train_acc_dict,
+        "val_acc": val_acc_dict,
+    }
 
 
 def plot_train_test(loss, accuracy):
