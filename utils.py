@@ -189,9 +189,9 @@ def tune_model(model, criterion, epochs, rounds = 15, **model_hyperparams):
                 #Tune
                 for ap_ in model_hyperparams["aux_params"]:
                         
-                    avg_train_losses = torch.zeros((rnd,epochs))
-                    avg_train_acc = torch.zeros((rnd,epochs))
-                    avg_val_acc = torch.zeros((rnd,epochs))
+                    avg_train_losses = torch.zeros(epochs)
+                    avg_train_acc = torch.zeros(epochs)
+                    avg_val_acc = torch.zeros(epochs)
                     #Run with newly generated data for 10+ rounds to be sure if training goes well behaved for new data as well
                     for rnd in range(rounds):
 
@@ -209,9 +209,14 @@ def tune_model(model, criterion, epochs, rounds = 15, **model_hyperparams):
 
                          train_losses, train_acc, val_acc = train_model(model, train_dataset, val_dataset, criterion, lr=lr_, weight_decay=wd_, batch_size=bs_, aux_param=ap_)
 
-                        avg_train_losses[rnd] train_losses
-                        avg_train_acc[rnd] = avg_train_acc
-                        avg_val_acc[rnd] = avg_val_acc
+                        avg_train_losses += train_losses
+                        avg_train_acc += avg_train_acc
+                        avg_val_acc += avg_val_acc
+                    
+                    avg_train_losses /= rounds
+                    avg_train_acc /= rounds
+                    avg_val_acc /= rounds
+
 
                         
 
