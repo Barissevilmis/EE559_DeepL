@@ -203,7 +203,7 @@ def tune_model(model, criterion, epochs=100, rounds=15, **model_hyperparams):
 
                         # Generate dataset
                         (train_input, train_target, train_classes), (val_input, val_target,
-                                                                        val_classes) = generate_dataset(model_hyperparams["sample_size"])
+                                                                     val_classes) = generate_dataset(model_hyperparams["sample_size"])
 
                         # Preprocess dataset
                         train_dataset, val_dataset = preprocess_dataset(
@@ -252,7 +252,7 @@ def tune_model(model, criterion, epochs=100, rounds=15, **model_hyperparams):
 
                     # Generate dataset
                     (train_input, train_target, train_classes), (val_input, val_target,
-                                                                    val_classes) = generate_dataset(model_hyperparams["sample_size"])
+                                                                 val_classes) = generate_dataset(model_hyperparams["sample_size"])
 
                     # Preprocess dataset
                     train_dataset, val_dataset = preprocess_dataset(
@@ -285,7 +285,6 @@ def tune_model(model, criterion, epochs=100, rounds=15, **model_hyperparams):
                     best_hyperparams["lr"] = lr_
                     best_hyperparams["weight_decay"] = wd_
                     best_hyperparams["batch_size"] = model_hyperparams["batch_size"]
-                    best_hyperparams["aux_param"] = ap_
 
     return best_hyperparams, best_train_loss, best_train_acc, best_val_acc
 
