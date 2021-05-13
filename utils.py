@@ -141,13 +141,13 @@ def train_model(model, train_dataset, val_dataset, criterion, epochs=100, **mode
                 optimizer.step()
 
             epoch_loss += loss.item()
-            print("Epoch", str(epoch), ", Batch", str(batch_id), " train loss:", str(
-                loss.item()), "Epoch Loss Summation:", str(epoch_loss))
+            # print("Epoch", str(epoch), ", Batch", str(batch_id), " train loss:", str(
+            #    loss.item()), "Epoch Loss Summation:", str(epoch_loss))
 
         # Decay learning rate with scheduler
         scheduler.step()
         print("Epoch", str(epoch), ", Current learning rate:",
-              scheduler.get_last_lr())
+              scheduler.get_last_lr(), ", Epoch loss:", epoch_loss)
         train_losses[epoch] = epoch_loss
 
         train_error = compute_nb_errors(
@@ -163,7 +163,7 @@ def train_model(model, train_dataset, val_dataset, criterion, epochs=100, **mode
     return train_losses, train_acc, val_acc
 
 
-def tune_model(model, criterion, epochs, rounds=15, **model_hyperparams):
+def tune_model(model, criterion, epochs=100, rounds=15, **model_hyperparams):
     '''
     This function executes a given model for various hyperparameters and return best set of parameters
     '''
@@ -174,6 +174,11 @@ def tune_model(model, criterion, epochs, rounds=15, **model_hyperparams):
         "batch_size": 0,
         "aux_param": 0,
     }
+    current_score = -float("inf")
+
+    best_train_loss = torch.zeros(epochs)
+    best_train_acc = torch.zeros(epochs)
+    best_val_acc = torch.zeros(epochs)
 
     # Tune learning rate
     for lr_ in model_hyperparams["lr"]:
@@ -185,11 +190,15 @@ def tune_model(model, criterion, epochs, rounds=15, **model_hyperparams):
             for bs_ in model_hyperparams["batch_size"]:
 
                 # Tune
-                for ap_ in model_hyperparams["aux_params"]:
+                for ap_ in model_hyperparams["aux_param"]:
 
                     avg_train_losses = torch.zeros(epochs)
                     avg_train_acc = torch.zeros(epochs)
                     avg_val_acc = torch.zeros(epochs)
+
+                    # Keep track of the validation accuracy each round
+                    rnd_val_acc = torch.zeros(rounds)
+
                     # Run with newly generated data for 10+ rounds to be sure if training goes well behaved for new data as well
                     for rnd in range(rounds):
 
@@ -201,29 +210,51 @@ def tune_model(model, criterion, epochs, rounds=15, **model_hyperparams):
                         train_dataset, val_dataset = preprocess_dataset(
                             train_input, train_target, train_classes, val_input, val_target, val_classes)
 
-                        # Use dataloader for shuffling and utilizing data
-                        train_dataloader = utils.data.DataLoader(
-                            train_dataset, batch_size=model_hyperparams["batch_size"], shuffle=True)
-
                         train_losses, train_acc, val_acc = train_model(
-                            model, train_dataset, val_dataset, criterion, lr=lr_, weight_decay=wd_, batch_size=bs_, aux_param=ap_)
+                            model, train_dataset, val_dataset, criterion, epochs, lr=lr_, weight_decay=wd_, batch_size=bs_, aux_param=ap_)
 
                         avg_train_losses += train_losses
-                        avg_train_acc += avg_train_acc
-                        avg_val_acc += avg_val_acc
+                        avg_train_acc += train_acc
+                        avg_val_acc += val_acc
+
+                        rnd_val_acc[rnd] = val_acc[-1]
 
                     avg_train_losses /= rounds
                     avg_train_acc /= rounds
                     avg_val_acc /= rounds
 
+                    # Get this hyperparam's score
+                    score = compute_single_score(rnd_val_acc)
 
-def compute_scores(model, criterion, epochs, **model_hyperparams):
+                    # Store the best hyperparams in the hyperparams dict
+                    if score > current_score:
+                        current_score = score
+
+                        best_train_loss = avg_train_losses.clone()
+                        best_train_acc = avg_train_acc.clone()
+                        best_val_acc = avg_val_acc.clone()
+
+                        best_hyperparams["lr"] = lr_
+                        best_hyperparams["weight_decay"] = wd_
+                        best_hyperparams["batch_size"] = bs_
+                        best_hyperparams["aux_param"] = ap_
+
+    return best_hyperparams, best_train_loss, best_train_acc, best_val_acc
+
+
+def compute_single_score(my_tensor):
+    '''
+    Compute the score from std and mean of a single tensor
+    We define the score as mean/std
+    '''
+
+    return my_tensor.mean().item()/my_tensor.std().item()
+
+
+def compute_scores(train_losses, train_acc, val_acc):
     '''
     From the train model, calculate the statistical scores per epoch
     '''
-
-    train_losses, train_acc, val_acc = train_model(
-        model, criterion, epochs, **model_hyperparams)
 
     train_losses_mean = torch.mean(train_losses).item()
     train_losses_std = torch.std(train_losses).item()
