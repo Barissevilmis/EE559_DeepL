@@ -107,7 +107,7 @@ def train_model(model, train_dataset, val_dataset, criterion, epochs=100, **mode
     # Scheduler used for learning rate decay: Every 25 epochs lr = lr * gamma
     optimizer = optim.Adam(
         model.parameters(), lr=model_hyperparams["lr"], weight_decay=model_hyperparams["weight_decay"])
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=25, gamma=0.1)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=15, gamma=0.1)
     # * Playable hyperparameters: weight decay, learning rate
 
     model.train(True)
@@ -186,10 +186,9 @@ def tune_model(model, criterion, epochs=100, rounds=15, **model_hyperparams):
         # Tune weight decay
         for wd_ in model_hyperparams["weight_decay"]:
 
-            # Tune batch size
-            for bs_ in model_hyperparams["batch_size"]:
+            if type(model).__name__ == "AuxiliaryNet":
 
-                # Tune
+                # Tune aux params
                 for ap_ in model_hyperparams["aux_param"]:
 
                     avg_train_losses = torch.zeros(epochs)
@@ -204,7 +203,7 @@ def tune_model(model, criterion, epochs=100, rounds=15, **model_hyperparams):
 
                         # Generate dataset
                         (train_input, train_target, train_classes), (val_input, val_target,
-                                                                     val_classes) = generate_dataset(model_hyperparams["sample_size"])
+                                                                        val_classes) = generate_dataset(model_hyperparams["sample_size"])
 
                         # Preprocess dataset
                         train_dataset, val_dataset = preprocess_dataset(
@@ -238,6 +237,55 @@ def tune_model(model, criterion, epochs=100, rounds=15, **model_hyperparams):
                         best_hyperparams["weight_decay"] = wd_
                         best_hyperparams["batch_size"] = bs_
                         best_hyperparams["aux_param"] = ap_
+
+            else:
+
+                avg_train_losses = torch.zeros(epochs)
+                avg_train_acc = torch.zeros(epochs)
+                avg_val_acc = torch.zeros(epochs)
+
+                # Keep track of the validation accuracy each round
+                rnd_val_acc = torch.zeros(rounds)
+
+                # Run with newly generated data for 10+ rounds to be sure if training goes well behaved for new data as well
+                for rnd in range(rounds):
+
+                    # Generate dataset
+                    (train_input, train_target, train_classes), (val_input, val_target,
+                                                                    val_classes) = generate_dataset(model_hyperparams["sample_size"])
+
+                    # Preprocess dataset
+                    train_dataset, val_dataset = preprocess_dataset(
+                        train_input, train_target, train_classes, val_input, val_target, val_classes)
+
+                    train_losses, train_acc, val_acc = train_model(
+                        model, train_dataset, val_dataset, criterion, epochs, lr=lr_, weight_decay=wd_, batch_size=bs_)
+
+                    avg_train_losses += train_losses
+                    avg_train_acc += train_acc
+                    avg_val_acc += val_acc
+
+                    rnd_val_acc[rnd] = val_acc[-1]
+
+                avg_train_losses /= rounds
+                avg_train_acc /= rounds
+                avg_val_acc /= rounds
+
+                # Get this hyperparam's score
+                score = compute_single_score(rnd_val_acc)
+
+                # Store the best hyperparams in the hyperparams dict
+                if score > current_score:
+                    current_score = score
+
+                    best_train_loss = avg_train_losses.clone()
+                    best_train_acc = avg_train_acc.clone()
+                    best_val_acc = avg_val_acc.clone()
+
+                    best_hyperparams["lr"] = lr_
+                    best_hyperparams["weight_decay"] = wd_
+                    best_hyperparams["batch_size"] = bs_
+                    best_hyperparams["aux_param"] = ap_
 
     return best_hyperparams, best_train_loss, best_train_acc, best_val_acc
 
