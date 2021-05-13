@@ -210,7 +210,7 @@ def tune_model(model, criterion, epochs=100, rounds=15, **model_hyperparams):
                             train_input, train_target, train_classes, val_input, val_target, val_classes)
 
                         train_losses, train_acc, val_acc = train_model(
-                            model, train_dataset, val_dataset, criterion, epochs, lr=lr_, weight_decay=wd_, batch_size=bs_, aux_param=ap_)
+                            model, train_dataset, val_dataset, criterion, epochs, lr=lr_, weight_decay=wd_, batch_size=model_hyperparams["batch_size"], aux_param=ap_)
 
                         avg_train_losses += train_losses
                         avg_train_acc += train_acc
@@ -259,7 +259,7 @@ def tune_model(model, criterion, epochs=100, rounds=15, **model_hyperparams):
                         train_input, train_target, train_classes, val_input, val_target, val_classes)
 
                     train_losses, train_acc, val_acc = train_model(
-                        model, train_dataset, val_dataset, criterion, epochs, lr=lr_, weight_decay=wd_, batch_size=bs_)
+                        model, train_dataset, val_dataset, criterion, epochs, lr=lr_, weight_decay=wd_, batch_size=model_hyperparams["batch_size"])
 
                     avg_train_losses += train_losses
                     avg_train_acc += train_acc
