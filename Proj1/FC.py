@@ -52,8 +52,8 @@ class DenseClassificationNet(nn.Module):
     (-) Initialize with Xavier initialization(Fully Connected Layers) 
     (Operations)                                    (Input Size)
     -------------------------------------------------------------
-    Initial input :                                  19 x 1
-    Fully Connected Layer with ReLU(1) :             19 x 1 -> 128 x 1 
+    Initial input :                                  20 x 1
+    Fully Connected Layer with ReLU(1) :             20 x 1 -> 128 x 1 
     BatchNorm1d(1) + Dropout(Probability = 0.2)(1) : 128 x 1
     Fully Connected Layer with ReLU(2) :             128 x 1 -> 32 x 1 
     BatchNorm1d(2) + Dropout(Probability = 0.2)(2) : 128 x 1
