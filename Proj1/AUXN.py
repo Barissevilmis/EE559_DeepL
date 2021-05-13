@@ -16,7 +16,7 @@ class AuxiliaryNet(nn.Module):
     Initial input :                                  2 x 14 x 14
     Seperate it from the first dimension:            1 x 14 x 14 (Both digits) 
     Classify with Convolutional Networks:            1 x 14 x 14 -> 10 x 1 (Both digits)
-    Transpose Convolution:                           10 x 1 and 10 x 1 -> 19 x 1
+    Transpose Convolution:                           10 x 1 and 10 x 1 -> 20 x 1
     Classify with Dense Network:                     20 x 1 -> 2 x 1
     
     '''
