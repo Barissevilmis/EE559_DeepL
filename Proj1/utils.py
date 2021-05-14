@@ -286,6 +286,132 @@ def tune_model(model, criterion, epochs=100, rounds=15, **model_hyperparams):
     return best_hyperparams, best_train_loss, best_train_acc, best_val_acc
 
 
+def tune_model_single(model, criterion, epochs=100, rounds=15, **model_hyperparams):
+    '''
+    This function executes a given model for a single hyperparameter and return the round value accuracies
+    '''
+
+    best_hyperparams = {
+        "lr": 0,
+        "weight_decay": 0,
+        "batch_size": 0,
+        "aux_param": 0,
+    }
+    current_score = -float("inf")
+
+    best_train_loss = torch.zeros(epochs)
+    best_train_acc = torch.zeros(epochs)
+    best_val_acc = torch.zeros(epochs)
+
+    # Keep track of the validation accuracy each round
+    rnd_val_acc = torch.zeros(rounds)
+
+    # Tune learning rate
+    for lr_ in model_hyperparams["lr"]:
+
+        # Tune weight decay
+        for wd_ in model_hyperparams["weight_decay"]:
+
+            if type(model).__name__ == "AuxiliaryNet":
+
+                # Tune aux params
+                for ap_ in model_hyperparams["aux_param"]:
+
+                    avg_train_losses = torch.zeros(epochs)
+                    avg_train_acc = torch.zeros(epochs)
+                    avg_val_acc = torch.zeros(epochs)
+
+                    # Keep track of the validation accuracy each round
+                    rnd_val_acc = torch.zeros(rounds)
+
+                    # Run with newly generated data for 10+ rounds to be sure if training goes well behaved for new data as well
+                    for rnd in range(rounds):
+
+                        # Generate dataset
+                        (train_input, train_target, train_classes), (val_input, val_target,
+                                                                     val_classes) = generate_dataset(model_hyperparams["sample_size"])
+
+                        # Preprocess dataset
+                        train_dataset, val_dataset = preprocess_dataset(
+                            train_input, train_target, train_classes, val_input, val_target, val_classes)
+
+                        train_losses, train_acc, val_acc = train_model(
+                            model, train_dataset, val_dataset, criterion, epochs, lr=lr_, weight_decay=wd_, batch_size=model_hyperparams["batch_size"], aux_param=ap_)
+
+                        avg_train_losses += train_losses
+                        avg_train_acc += train_acc
+                        avg_val_acc += val_acc
+
+                        rnd_val_acc[rnd] = val_acc[-1]
+
+                    avg_train_losses /= rounds
+                    avg_train_acc /= rounds
+                    avg_val_acc /= rounds
+
+                    # Get this hyperparam's score
+                    score = compute_single_score(rnd_val_acc)
+
+                    # Store the best hyperparams in the hyperparams dict
+                    if score > current_score:
+                        current_score = score
+
+                        best_train_loss = avg_train_losses.clone()
+                        best_train_acc = avg_train_acc.clone()
+                        best_val_acc = avg_val_acc.clone()
+
+                        best_hyperparams["lr"] = lr_
+                        best_hyperparams["weight_decay"] = wd_
+                        best_hyperparams["batch_size"] = model_hyperparams["batch_size"]
+                        best_hyperparams["aux_param"] = ap_
+
+            else:
+
+                avg_train_losses = torch.zeros(epochs)
+                avg_train_acc = torch.zeros(epochs)
+                avg_val_acc = torch.zeros(epochs)
+
+                # Run with newly generated data for 10+ rounds to be sure if training goes well behaved for new data as well
+                for rnd in range(rounds):
+
+                    # Generate dataset
+                    (train_input, train_target, train_classes), (val_input, val_target,
+                                                                 val_classes) = generate_dataset(model_hyperparams["sample_size"])
+
+                    # Preprocess dataset
+                    train_dataset, val_dataset = preprocess_dataset(
+                        train_input, train_target, train_classes, val_input, val_target, val_classes)
+
+                    train_losses, train_acc, val_acc = train_model(
+                        model, train_dataset, val_dataset, criterion, epochs, lr=lr_, weight_decay=wd_, batch_size=model_hyperparams["batch_size"])
+
+                    avg_train_losses += train_losses
+                    avg_train_acc += train_acc
+                    avg_val_acc += val_acc
+
+                    rnd_val_acc[rnd] = val_acc[-1]
+
+                avg_train_losses /= rounds
+                avg_train_acc /= rounds
+                avg_val_acc /= rounds
+
+                # Get this hyperparam's score
+                score = compute_single_score(rnd_val_acc)
+
+                # Store the best hyperparams in the hyperparams dict
+                if score > current_score:
+                    current_score = score
+
+                    best_train_loss = avg_train_losses.clone()
+                    best_train_acc = avg_train_acc.clone()
+                    best_val_acc = avg_val_acc.clone()
+
+                    best_hyperparams["lr"] = lr_
+                    best_hyperparams["weight_decay"] = wd_
+                    best_hyperparams["batch_size"] = model_hyperparams["batch_size"]
+
+    return rnd_val_acc
+
+
 def compute_single_score(my_tensor):
     '''
     Compute the score from std and mean of a single tensor
@@ -394,6 +520,38 @@ def plot_train_test(train_loss, train_acc, test_acc, model_name):
     fig.tight_layout()
     plt.savefig('loss_acc_'+model_name.lower() +
                 '.png', dpi=500, transparent=True)
+    plt.show()
+
+
+def plot_val_scores():
+    '''
+    Plot validation accuracy scores for each round (15)
+    '''
+    fc = torch.load('rnd_val_acc_fc.pt')
+    cnn = torch.load('rnd_val_acc_cnn.pt')
+    auxn = torch.load('rnd_val_acc_auxn.pt')
+
+    print("FC:")
+    print(f"std: {fc.std()}, mean: {fc.mean()}")
+    print("CNN:")
+    print(f"std: {cnn.std()}, mean: {cnn.mean()}")
+    print("AUXN:")
+    print(f"std: {auxn.std()}, mean: {auxn.mean()}")
+
+    rnds = range(1, 16)
+
+    plt.figure(figsize=(8, 8))
+    plt.plot(rnds, fc, label="FC")
+    plt.plot(rnds, cnn, label="CNN")
+    plt.plot(rnds, auxn, label="AUXN")
+    plt.legend(fontsize=16)
+    plt.xlabel("Round", fontsize=18)
+    plt.ylabel("Final validation accuracy", fontsize=18)
+    plt.title("Change of validation accuracy per round", fontsize=18)
+    plt.xticks(fontsize=16)
+    plt.yticks(fontsize=16)
+    plt.tight_layout()
+    plt.savefig('val_acc_round.png', dpi=500, transparent=True)
     plt.show()
 
 

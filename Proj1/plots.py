@@ -21,3 +21,5 @@ best_val_acc_auxn = torch.load("best_val_acc_auxn.pt")
 
 utils.plot_train_test(best_train_loss_auxn,
                       best_train_acc_auxn, best_val_acc_auxn, "AUXN")
+
+utils.plot_val_scores()
