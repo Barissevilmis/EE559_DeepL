@@ -5,6 +5,7 @@ import dlc_practical_prologue as prologue
 
 from Dataset import DataSet
 
+# Only used for performance visualization
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -348,22 +349,31 @@ def compute_scores(train_losses, train_acc, val_acc):
     }
 
 
-def plot_train_test(loss, accuracy):
+def plot_train_test(train_loss, train_acc, test_acc):
+    '''
+    Plot train loss, train accuracy, and test accuracy per epoch on the same graph
+    Separate y-axes for loss and accuracy
+    '''
     fig, ax1 = plt.subplots(figsize=(8, 8))
-
+    ax1.set_title('Loss and Accuracies', fontsize=16)
+    
     # Plot train loss
-    ax1.set_title('Training Loss and Test Accuracy', fontsize=16)
     ax1.set_xlabel('Epochs', fontsize=16)
     ax1.set_ylabel('Train loss (log)', fontsize=16)
     ax1.set_yscale("log")
-    ax1 = sns.lineplot(x=range(len(loss)), y=loss,
-                       color='tab:orange', label='Train loss', legend=False)
+    ax1 = sns.lineplot(x=range(len(train_loss)), y=train_loss,
+                       color='tab:red', label='Train loss', legend=False)
     ax1.tick_params(axis='y')
     ax2 = ax1.twinx()
 
+    # Plot train accuracy
+    ax2.set_ylabel('Accuracy (%)', fontsize=16)
+    ax2 = sns.lineplot(x=range(len(train_acc)), y=train_acc,
+                       color='tab:blue', label='Train accuracy', legend=False)
+    ax2.tick_params(axis='y')
+    
     # Plot test accuracy
-    ax2.set_ylabel('Test accuracy (%)', fontsize=16)
-    ax2 = sns.lineplot(x=range(len(accuracy)), y=accuracy,
+    ax2 = sns.lineplot(x=range(len(test_acc)), y=test_acc,
                        color='tab:green', label='Test accuracy', legend=False)
     ax2.tick_params(axis='y')
 
