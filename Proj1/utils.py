@@ -349,14 +349,14 @@ def compute_scores(train_losses, train_acc, val_acc):
     }
 
 
-def plot_train_test(train_loss, train_acc, test_acc):
+def plot_train_test(train_loss, train_acc, test_acc, model_name):
     '''
     Plot train loss, train accuracy, and test accuracy per epoch on the same graph
     Separate y-axes for loss and accuracy
     '''
     fig, ax1 = plt.subplots(figsize=(8, 8))
-    ax1.set_title('Loss and Accuracies', fontsize=16)
-    
+    ax1.set_title('Loss and Accuracies: '+model_name, fontsize=16)
+
     # Plot train loss
     ax1.set_xlabel('Epochs', fontsize=16)
     ax1.set_ylabel('Train loss (log)', fontsize=16)
@@ -371,7 +371,7 @@ def plot_train_test(train_loss, train_acc, test_acc):
     ax2 = sns.lineplot(x=range(len(train_acc)), y=train_acc,
                        color='tab:blue', label='Train accuracy', legend=False)
     ax2.tick_params(axis='y')
-    
+
     # Plot test accuracy
     ax2 = sns.lineplot(x=range(len(test_acc)), y=test_acc,
                        color='tab:green', label='Test accuracy', legend=False)
@@ -384,7 +384,8 @@ def plot_train_test(train_loss, train_acc, test_acc):
     labels = label1 + label2
     ax1.legend(lines, labels, loc='center right')
 
-    plt.savefig('loss_acc.png', dpi=800, transparent=True)
+    plt.savefig('loss_acc_'+model_name.lower() +
+                '.svg', dpi=800, transparent=True)
     plt.show()
 
 
