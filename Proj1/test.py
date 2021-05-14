@@ -16,6 +16,7 @@ user_input_aux = input("Would you like to tune AuxiliaryNet? (Y/N)")
 if user_input_fc == "Y":
     # Model FC
     model = FC.DenseNet()
+    print(f"Number of trainable parameters: {utils.count_parameters(model)}")
     best_hyperparams, best_train_loss, best_train_acc, best_val_acc = utils.tune_model(
         model, criterion, 50, 15, **hyperparam.HYPERPARAMS)
     print(best_hyperparams, best_train_loss, best_train_acc, best_val_acc)
@@ -28,6 +29,7 @@ if user_input_fc == "Y":
 if user_input_cnn == "Y":
     # Model CNN
     model = CNN.ConvNet()
+    print(f"Number of trainable parameters: {utils.count_parameters(model)}")
     best_hyperparams, best_train_loss, best_train_acc, best_val_acc = utils.tune_model(
         model, criterion, 50, 15, **hyperparam.HYPERPARAMS)
     print(best_hyperparams, best_train_loss, best_train_acc, best_val_acc)
@@ -40,6 +42,7 @@ if user_input_cnn == "Y":
 if user_input_aux == "Y":
     # Model AUXN
     model = AUXN.AuxiliaryNet()
+    print(f"Number of trainable parameters: {utils.count_parameters(model)}")
     best_hyperparams, best_train_loss, best_train_acc, best_val_acc = utils.tune_model(
         model, criterion, 50, 15, **hyperparam.HYPERPARAMS)
     print(best_hyperparams, best_train_loss, best_train_acc, best_val_acc)

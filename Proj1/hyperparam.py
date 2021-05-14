@@ -1,6 +1,7 @@
 LR = [5e-2, 5e-3, 5e-4]
-WEIGHT_DECAY = [1e-3, 1e-4, 1e-5]
+WEIGHT_DECAY = [1e-3, 1e-4, 1e-5]  # L2 penalty of the Adam optimizer
 BATCH_SIZE = 100
+# Coefficient to combine auxiliary losses with true loss
 AUX_PARAM = [.2, .4, .6]
 SAMPLE_SIZE = 1000
 
