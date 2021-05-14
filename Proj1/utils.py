@@ -385,7 +385,7 @@ def plot_train_test(train_loss, train_acc, test_acc, model_name):
     ax1.legend(lines, labels, loc='center right')
 
     plt.savefig('loss_acc_'+model_name.lower() +
-                '.svg', dpi=800, transparent=True)
+                '.png', dpi=800, transparent=True)
     plt.show()
 
 
