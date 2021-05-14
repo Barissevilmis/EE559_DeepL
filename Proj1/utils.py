@@ -359,8 +359,7 @@ def plot_train_test(train_loss, train_acc, test_acc, model_name):
 
     # Plot train loss
     ax1.set_xlabel('Epochs', fontsize=18)
-    ax1.set_ylabel('Train loss (log)', fontsize=18)
-    ax1.set_yscale("log")
+    ax1.set_ylabel('Train loss', fontsize=18)
     ax1 = sns.lineplot(x=range(len(train_loss)), y=train_loss,
                        color='tab:red', label='Train loss', legend=False)
     ax1.tick_params(axis='y')
@@ -390,9 +389,9 @@ def plot_train_test(train_loss, train_acc, test_acc, model_name):
     ax2.yaxis.set_tick_params(labelsize=16)
 
     # Set accuracy y-axis range
-    ax2.set(ylim=(70.0, 100.0)) 
+    ax2.set(ylim=(0.7, 1.0))
 
-    fig.tight_layout() 
+    fig.tight_layout()
     plt.savefig('loss_acc_'+model_name.lower() +
                 '.png', dpi=500, transparent=True)
     plt.show()
