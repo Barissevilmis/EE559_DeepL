@@ -1,7 +1,5 @@
 import torch
 from torch import nn
-from torch.nn import functional as F
-from torch import optim
 
 from CNN import ConvClassificationNet
 from FC import DenseClassificationNet
