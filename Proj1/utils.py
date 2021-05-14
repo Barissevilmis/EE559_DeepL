@@ -355,11 +355,11 @@ def plot_train_test(train_loss, train_acc, test_acc, model_name):
     Separate y-axes for loss and accuracy
     '''
     fig, ax1 = plt.subplots(figsize=(8, 8))
-    ax1.set_title('Loss and Accuracies: '+model_name, fontsize=16)
+    ax1.set_title('Loss and Accuracies: '+model_name, fontsize=18)
 
     # Plot train loss
-    ax1.set_xlabel('Epochs', fontsize=16)
-    ax1.set_ylabel('Train loss (log)', fontsize=16)
+    ax1.set_xlabel('Epochs', fontsize=18)
+    ax1.set_ylabel('Train loss (log)', fontsize=18)
     ax1.set_yscale("log")
     ax1 = sns.lineplot(x=range(len(train_loss)), y=train_loss,
                        color='tab:red', label='Train loss', legend=False)
@@ -367,7 +367,7 @@ def plot_train_test(train_loss, train_acc, test_acc, model_name):
     ax2 = ax1.twinx()
 
     # Plot train accuracy
-    ax2.set_ylabel('Accuracy (%)', fontsize=16)
+    ax2.set_ylabel('Accuracy', fontsize=18)
     ax2 = sns.lineplot(x=range(len(train_acc)), y=train_acc,
                        color='tab:blue', label='Train accuracy', legend=False)
     ax2.tick_params(axis='y')
@@ -382,10 +382,19 @@ def plot_train_test(train_loss, train_acc, test_acc, model_name):
     line2, label2 = ax2.get_legend_handles_labels()
     lines = line1 + line2
     labels = label1 + label2
-    ax1.legend(lines, labels, loc='center right')
+    ax1.legend(lines, labels, loc='center right', fontsize=16)
 
+    # Set tick font size
+    ax1.xaxis.set_tick_params(labelsize=16)
+    ax1.yaxis.set_tick_params(labelsize=16)
+    ax2.yaxis.set_tick_params(labelsize=16)
+
+    # Set accuracy y-axis range
+    ax2.set(ylim=(70.0, 100.0)) 
+
+    fig.tight_layout() 
     plt.savefig('loss_acc_'+model_name.lower() +
-                '.png', dpi=800, transparent=True)
+                '.png', dpi=500, transparent=True)
     plt.show()
 
 
