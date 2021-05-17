@@ -2,12 +2,11 @@ from typing import Optional, Callable
 import math
 
 import torch
-from torch.optim import Optimizer
 
 
-class AdamOptimizer(Optimizer):
+class AdamOptimizer(_Optimizer_):
 
-    def __init__(self, params, lr = 1e-2, beta1=0.9, beta2=0.999, weight_decay = 0.0, epsilon = 5e-9):
+    def __init__(self, model, epochs = 50, criterion = MSE(), batch_size = 1, lr = 1e-2, beta1=0.9, beta2=0.999, weight_decay = 0.0, epsilon = 5e-9):
 
         if(lr < 0.0):
             self.lr = 1e-2
@@ -37,7 +36,7 @@ class AdamOptimizer(Optimizer):
 
         defaults = dict(lr = self.lr, beta1 = self.beta1, beta2=self.beta2, weight_decay=self.weight_decay, epsilon=self.epsilon)
 
-        super(AdamOptimizer,self).__init__(params, defaults)
+        super().__init__(params, defaults)
 
     def __initstate__(self):
         """Initialize state variables:
@@ -115,13 +114,13 @@ class AdamOptimizer(Optimizer):
                     p.data = p.data - lr * wd * p.data
 
 
-class SGDOptimizer(Optimizer):
+class SGDOptimizer(_Optimizer_):
     '''
     Mini batch SGD optimizer: Only  parameters learning rate
     Learning rate: 1e-2 by default
     Optimize by step(): decrease by learning rate * gradient
     '''
-    def __init__(self, params, lr = 1e-2, batch_size = 1):
+    def __init__(self, model, epochs = 100, criterion = MSE(), batch_size = 1, lr = 1e-2, batch_size = 1):
 
         if(lr < 0.0):
             self.lr = 1e-2
