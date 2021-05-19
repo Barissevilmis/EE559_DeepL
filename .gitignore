@@ -3,3 +3,4 @@ __pycache__/
 workspace.code-workspace
 data/
 .ipynb_checkpoints
+.DS_Store
