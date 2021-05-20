@@ -1,4 +1,5 @@
 from typing import Optional, Callable
+from losses import MSE, CrossEntropy 
 import math
 import torch
 
@@ -81,7 +82,7 @@ class AdamOptimizer(_Optimizer_):
 
         defaults = dict(lr = self.lr, beta1 = self.beta1, beta2=self.beta2, weight_decay=self.weight_decay, epsilon=self.epsilon)
 
-        super().__init__(params, defaults)
+        super().__init__(model, epochs, criterion, batch_size, lr)
 
     def __initstate__(self):
         """Initialize state variables:
@@ -181,7 +182,7 @@ class SGDOptimizer(_Optimizer_):
 
         defaults = dict(lr = self.lr, batch_size = self.batch_size)
 
-        super(SGDOptimizer,self).__init__(params, defaults)
+        super().__init__(model, epochs, criterion, batch_size, lr)
 
 
     def step(self, closure: Optional[Callable[[], float]] = ...) -> Optional[float]:
