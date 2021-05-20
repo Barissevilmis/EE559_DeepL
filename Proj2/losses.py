@@ -15,8 +15,7 @@ class MSE(Module):
         self.target = None
 
     def __call__(self, target, pred):
-        self.forward(target, pred)
-        return self
+        return self.forward(target, pred)
 
     def forward(self, target, pred):
  
@@ -45,8 +44,7 @@ class CrossEntropy(Module):
         self.target = None
 
     def __call__(self, target, pred):
-        self.forward(target, pred)
-        return self
+        return self.forward(target, pred)
 
     def forward(self, target, pred):
  
