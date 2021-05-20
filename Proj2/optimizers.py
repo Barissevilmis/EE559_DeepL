@@ -1,8 +1,53 @@
 from typing import Optional, Callable
 import math
-
 import torch
 
+class _Optimizer_:
+    '''
+    Optimizer: Superclass for Adam and SGD
+    '''
+    def __init__(self, model, epochs, criterion, batch_size, lr):
+
+        self.model = model
+        self.criterion = criterion
+        if epochs <= 0:
+            raise ValueError("Epoch must be greater than 0!")
+        else: 
+            self.epochs = int(epochs)
+        if batch_size <= 0:
+            raise ValueError("Batch size must be greater than 0!")
+        else:
+            self.batch_size = int(batch_size)
+        if lr <= 0:
+            raise ValueError("Learning rate must be greater than 0!")
+        else:
+            self.lr = float(lr)
+
+    def train(self, train_input, train_target):
+
+        train_input_batches = train_input.split(split_size = self.batch_size,dim = 0)
+        train_target_batches = train_target.split(split_size = self.batch_size,dim = 0)
+
+        for epoch in range(self.epochs):
+            epoch_loss = 0.0
+
+            for curr_batch in range(0,train_input_batches.shape[0]):
+                self.model.zero_grad()
+
+                pred = self.model.forward(train_input_batches[curr_batch])
+                loss = self.criterion.forward(train_target_batches[curr_batch],pred)
+                grad = self.criterion.backward()
+                self.model.backward(grad)
+                self.step()
+
+                epoch_loss += loss
+
+            print("Epoch " + str(epoch) + ", Train loss: " + str(epoch_loss))
+
+        return self.model
+
+    def step(self):
+        raise NotImplementedError
 
 class AdamOptimizer(_Optimizer_):
 

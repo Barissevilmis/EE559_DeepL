@@ -26,7 +26,7 @@ class MSE(Module):
         return (2 * error) / self.pred.shape[0]
 
 
-class CrossEntropy(Module):
+class BinaryCrossEntropy(Module):
     '''
     CE: CE(f(x), y) = - sum_i=1^N(I(y_i) * LogSoftmax(f(x_i))) / N, where N is size
     f(x_i): predictions -> pred
