@@ -3,7 +3,10 @@ class Module(object) :
     def __init__(self):
         self.out = None
 
-    def forward ( self , * input ) :
+    def __call__(self):
+        raise NotImplementedError
+
+    def forward ( self , *inpt ) :
         raise NotImplementedError
 
     def backward ( self , * gradwrtoutput ) :

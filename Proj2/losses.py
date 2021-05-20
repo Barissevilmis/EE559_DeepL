@@ -14,9 +14,13 @@ class MSE(Module):
         self.pred = None
         self.target = None
 
+    def __call__(self, target, pred):
+        self.forward(target, pred)
+        return self
+
     def forward(self, target, pred):
  
-        self.target = torch.empty((target.shape[0], 2)).scatter_(1, target.view(-1, 1), 1)
+        self.target = target.clone()
         self.pred = pred.clone()
         error = self.pred - self.target
         return error.pow(2).mean()
@@ -26,7 +30,7 @@ class MSE(Module):
         return (2 * error) / self.pred.shape[0]
 
 
-class BinaryCrossEntropy(Module):
+class CrossEntropy(Module):
     '''
     CE: CE(f(x), y) = - sum_i=1^N(I(y_i) * LogSoftmax(f(x_i))) / N, where N is size
     f(x_i): predictions -> pred
@@ -40,14 +44,18 @@ class BinaryCrossEntropy(Module):
         self.pred = None
         self.target = None
 
+    def __call__(self, target, pred):
+        self.forward(target, pred)
+        return self
+
     def forward(self, target, pred):
  
-        self.target = torch.empty((target.shape[0], target.shape[1])).scatter_(1, target.view(-1, 1), 1)
+        self.target = target.clone()
         self.pred = pred.clone()
-        return -1 * (self.target * torch.log_softmax(self.pred, dim = 1)).sum() /  target.shape[0]
+        return -1 * (self.target * self.pred.log_softmax(dim = 1)).sum() /  target.shape[0]
 
     def backward(self):
-        return torch.softmax(self.pred, dim  = 1) - self.target
+        return self.pred.softmax(dim  = 1) - self.target
 
 
 

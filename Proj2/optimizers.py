@@ -34,8 +34,8 @@ class _Optimizer_:
             for curr_batch in range(0,train_input_batches.shape[0]):
                 self.model.zero_grad()
 
-                pred = self.model.forward(train_input_batches[curr_batch])
-                loss = self.criterion.forward(train_target_batches[curr_batch],pred)
+                pred = self.model(train_input_batches[curr_batch])
+                loss = self.criterion(train_target_batches[curr_batch],pred)
                 grad = self.criterion.backward()
                 self.model.backward(grad)
                 self.step()
