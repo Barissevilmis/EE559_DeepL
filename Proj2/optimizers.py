@@ -165,7 +165,7 @@ class SGDOptimizer(_Optimizer_):
     Learning rate: 1e-2 by default
     Optimize by step(): decrease by learning rate * gradient
     '''
-    def __init__(self, model, epochs = 100, criterion = MSE(), batch_size = 1, lr = 1e-2, batch_size = 1):
+    def __init__(self, model, epochs = 100, criterion = MSE(), batch_size = 1, lr = 1e-2):
 
         if(lr < 0.0):
             self.lr = 1e-2
