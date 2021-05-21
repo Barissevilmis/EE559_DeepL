@@ -104,10 +104,6 @@ class AdamOptimizer(_Optimizer_):
         super().__init__(model, epochs, criterion, batch_size, lr)
 
     def __initstate__(self):
-        """Initialize state variables:
-            - there's a 'general' state in which we store the steps
-            - there's a state for each model parameter
-        """
 
         for gp in self.param_groups:
             # Initialize parameter-specific state
