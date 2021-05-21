@@ -11,16 +11,22 @@ class _Optimizer_:
 
         self.model = model
         self.criterion = criterion
+        self.epochs = None
+        self.batch_size = None
+        self.lr = None
         if epochs <= 0:
-            raise ValueError("Epoch must be greater than 0!")
+            print("Epoch must be greater than 0, set to default of 50!")
+            self.epochs = 50
         else: 
             self.epochs = int(epochs)
         if batch_size <= 0:
-            raise ValueError("Batch size must be greater than 0!")
+            print("Batch size must be greater than 0, set to default 32!")
+            self.batch_size = 32
         else:
             self.batch_size = int(batch_size)
         if lr <= 0:
-            raise ValueError("Learning rate must be greater than 0!")
+            print("Learning rate must be greater than 0, set to default 1e-2!")
+            self.lr = 1e-2
         else:
             self.lr = float(lr)
 
