@@ -1,4 +1,4 @@
-class Module(object) :
+class Module(object):
 
     def __init__(self):
         self.out = None
@@ -6,11 +6,14 @@ class Module(object) :
     def __call__(self):
         raise NotImplementedError
 
-    def forward ( self , *inpt ) :
+    def forward(self, *inpt):
         raise NotImplementedError
 
-    def backward ( self , * gradwrtoutput ) :
+    def backward(self, * gradwrtoutput):
         raise NotImplementedError
 
-    def param (self) : 
+    def param(self):
         return []
+
+    def zero_grad(self):
+        pass

@@ -14,17 +14,17 @@ train_input, train_target, test_input, test_target = generate_set(1000)
 relu_model = Sequential(Linear(2, 25), ReLU(),
                         Linear(25, 25), ReLU(),
                         Linear(25, 25), ReLU(),
-                        Linear(25, 1), Sigmoid())
+                        Linear(25, 2), Sigmoid())
 
 tanh_model = Sequential(Linear(2, 25), Tanh(),
                         Linear(25, 25), Tanh(),
                         Linear(25, 25), Tanh(),
-                        Linear(25, 1), Sigmoid())
+                        Linear(25, 2), Sigmoid())
 
 sigmoid_model = Sequential(Linear(2, 25), Sigmoid(),
                            Linear(25, 25), Sigmoid(),
                            Linear(25, 25), Sigmoid(),
-                           Linear(25, 1), Sigmoid())
+                           Linear(25, 2), Sigmoid())
 
 model_params_adam = {'lr': [1e-2, 1e-3, 1e-4], 'beta1': [0.2, 0.6,
                                                          0.9], 'beta2': [0.8, 0.9, 0.999], 'weight_decay': [0, 5e-9, 1e-8]}
