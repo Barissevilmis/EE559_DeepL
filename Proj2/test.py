@@ -1,4 +1,4 @@
-from torch import empty
+from torch import empty, save
 import math
 from models import Linear, Sequential
 from activations import ReLU, Tanh, Sigmoid
@@ -33,6 +33,15 @@ best_param_adam_tanh = hyperparameter_tuning(tanh_model, optimizer="adam", crite
 best_param_adam_sigmoid = hyperparameter_tuning(sigmoid_model,  optimizer="adam", criterion=MSE(), epochs=50, batch_size=100, sample_size=1000, rounds=10, **model_params_adam)
 
 
+save(best_param_adam_relu, 'best_param_adam_relu.pt')
+save(best_param_adam_tanh, 'best_param_adam_tanh.pt')
+save(best_param_adam_sigmoid, 'best_param_adam_sigmoid.pt')
+
+
 best_param_sgd_relu = hyperparameter_tuning(relu_model, optimizer="sgd", criterion=MSE(), epochs=50, batch_size=100, sample_size=1000, rounds=10, **model_params_sgd)
-best_param_sgd_tanh= hyperparameter_tuning(tanh_model, optimizer="sgd", criterion=MSE(), epochs=50, batch_size=100, sample_size=1000, rounds=10, **model_params_sgd)
+best_param_sgd_tanh = hyperparameter_tuning(tanh_model, optimizer="sgd", criterion=MSE(), epochs=50, batch_size=100, sample_size=1000, rounds=10, **model_params_sgd)
 best_param_sgd_sigmoid = hyperparameter_tuning(sigmoid_model,  optimizer="sgd", criterion=MSE(), epochs=50, batch_size=100, sample_size=1000, rounds=10, **model_params_sgd)
+
+save(best_param_sgd_relu, 'best_param_sgd_relu.pt')
+save(best_param_sgd_tanh, 'best_param_sgd_tanh.pt')
+save(best_param_sgd_sigmoid, 'best_param_sgd_sigmoid.pt')
