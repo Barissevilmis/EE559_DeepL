@@ -21,6 +21,7 @@ def generate_set(sample=1000):
     test_target = test_target.int()
     return train_data, train_target, test_data, test_target
 
+
 def compute_nb_errors(model, data_input, data_target, batch_size=100):
     '''
     Calculate the number of errors given a model, data input, data target and mini batch size.
@@ -39,9 +40,11 @@ def compute_nb_errors(model, data_input, data_target, batch_size=100):
 
     return nb_data_errors
 
-def hyperparameter_tuning(model, optimizer = "adam" ,criterion = MSE(), epochs=50, batch_size=100, sample_size = 1000,rounds = 10,**model_params):
 
-    train_input, train_target, test_input, test_target = generate_set(sample_size)
+def hyperparameter_tuning(model, optimizer="adam", criterion=MSE(), epochs=50, batch_size=100, sample_size=1000, rounds=10, **model_params):
+
+    train_input, train_target, test_input, test_target = generate_set(
+        sample_size)
     acc = dict()
 
     if optimizer == "adam":
@@ -52,20 +55,35 @@ def hyperparameter_tuning(model, optimizer = "adam" ,criterion = MSE(), epochs=5
                 for b2 in model_params["beta2"]:
                     for wd in model_params["weight_decay"]:
                         for round in range(rounds):
-                            optim = AdamOptimizer(model, epochs, criterion, batch_size, lr=lr, beta1=b1, beta2=b2, weight_decay=wd)
-                            trained_model, train_losses = optim.train(train_input, train_target)
+                            optim = AdamOptimizer(
+                                model, epochs, criterion, batch_size, lr=lr, beta1=b1, beta2=b2, weight_decay=wd)
+                            trained_model, train_losses = optim.train(
+                                train_input, train_target)
 
-                            train_acc[round] = compute_nb_errors(trained_model, train_input, train_target) / sample_size
-                            val_acc[round] = compute_nb_errors(trained_model, test_input, test_target) / sample_size
+                            train_acc[round] = compute_nb_errors(
+                                trained_model, train_input, train_target) / sample_size
+                            val_acc[round] = compute_nb_errors(
+                                trained_model, test_input, test_target) / sample_size
 
-                        mean_acc[str(lr) + str(b1) + str(b2) + str] = (train_acc.mean(),val_acc.mean()))
-                        std_acc.append((train_acc.std(), val_acc.std()))
+                        acc[{"lr": lr, "b1": b1, "b2": b2, "wd": wd}
+                            ] = (train_acc.mean(), val_acc.mean(), train_acc.std(), val_acc.std())
 
-    
+        # Pick the best hyperparams
+        best_score = -float('inf')
+        best_param = None
+        for lr in model_params["lr"]:
+            for b1 in model_params["beta1"]:
+                for b2 in model_params["beta2"]:
+                    for wd in model_params["weight_decay"]:
+                        (_, val_acc_mean, _, val_acc_std) = acc[{
+                            "lr": lr, "b1": b1, "b2": b2, "wd": wd}]
+                        if val_acc_mean/val_acc_std > best_score:
+                            best_score = val_acc_mean/val_acc_std
+                            best_param = {
+                                "lr": lr, "b1": b1, "b2": b2, "wd": wd}
+
+        return best_param
+
     else:
-         for lr in model_params["lr"]:
+        for lr in model_params["lr"]:
             optim = SGDOptimizer(model, epochs, criterion, batch_size, lr=lr)
-
-
-
-
