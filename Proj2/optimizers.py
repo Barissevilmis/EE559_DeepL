@@ -43,9 +43,8 @@ class _Optimizer_:
         for epoch in range(self.epochs):
             epoch_loss = 0.0
 
-            print(train_input_batches)
             for batch_id, curr_batch in enumerate(train_input_batches):
-                self.zero_grad()
+                self.model.zero_grad()
 
                 pred = self.model(curr_batch)
                 loss = self.criterion(curr_batch, pred)
@@ -53,7 +52,7 @@ class _Optimizer_:
                 self.model.backward(grad)
                 self.step()
 
-                epoch_loss += loss
+                epoch_loss += loss.item()
 
             epoch_losses[epoch] = epoch_loss
             print("Epoch " + str(epoch) + ", Train loss: " + str(epoch_loss))
@@ -63,8 +62,6 @@ class _Optimizer_:
     def step(self):
         raise NotImplementedError
 
-    def zero_grad(self):
-        self.model.zero_grad()
 
 class SGDOptimizer(_Optimizer_):
     '''
@@ -88,13 +85,9 @@ class SGDOptimizer(_Optimizer_):
         else:
             self.batch_size = batch_size
 
-
         super().__init__(model, epochs, criterion, batch_size, lr)
 
     def step(self, closure: Optional[Callable[[], float]] = ...) -> Optional[float]:
 
         # Iterate over parameter groups
-        for (w, b, gw, gb) in self.model.param():
-
-            w = w - self.lr * gw
-            b = b - self.lr * gb
+        self.model.step(self.lr)

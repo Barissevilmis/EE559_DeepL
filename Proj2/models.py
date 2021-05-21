@@ -1,5 +1,3 @@
-from torch._C import R
-from torch.autograd import grad
 from module import Module
 from torch import empty
 import math
@@ -42,22 +40,24 @@ class Linear(Module):
     def backward(self, *gradwrtoutput):
 
         self.grad_data = gradwrtoutput[0].clone()
-        print(self.grad_weights.shape)
-        print(self.data.t().shape)
-        print(self.grad_data)
         self.grad_weights += self.data.t() @ self.grad_data
         self.grad_bias += self.grad_data.sum(0)
         return self.grad_data @ self.weights.t()
 
     def zero_grad(self):
         self.grad_weights = empty(
-            self.input_neurons, self.output_neurons).zero_()
-        self.grad_bias = empty(1, self.output_neurons).zero_()
+            (self.input_neurons, self.output_neurons)).zero_()
+        self.grad_bias = empty((1, self.output_neurons)).zero_()
 
     def param(self):
         res = list()
-        res.append((self.weights,self.bias,self.grad_weights,self.grad_bias))
+        res.append((self.weights, self.bias, self.grad_weights, self.grad_bias))
         return res
+
+    def step(self, lr):
+        self.weights -= lr*self.grad_weights
+        self.bias -= lr*self.grad_bias
+
 
 class Sequential(Module):
     def __init__(self, *network_structure):
@@ -82,6 +82,10 @@ class Sequential(Module):
     def zero_grad(self):
         for layer in self.network_structure:
             layer.zero_grad()
+
+    def step(self, lr):
+        for layer in self.network_structure:
+            layer.step(lr)
 
     def param(self):
         res = list()

@@ -1,4 +1,4 @@
-from optimizers import AdamOptimizer, SGDOptimizer
+from optimizers import SGDOptimizer
 from torch import empty
 import math
 from models import Linear, Sequential
@@ -34,78 +34,43 @@ def compute_nb_errors(model, data_input, data_target, batch_size=100):
 
         pred = model(data_input.narrow(0, b, batch_size))
 
+        _, predicted_classes = pred.max(1)
         for k in range(batch_size):
-            if data_target[b + k] != pred[k]:
+            if data_target[b + k] != predicted_classes[k]:
                 nb_data_errors += 1
 
     return nb_data_errors
 
 
-def hyperparameter_tuning(model, optimizer="adam", criterion=MSE(), epochs=50, batch_size=100, sample_size=1000, rounds=10, **model_params):
+def hyperparameter_tuning(model, optimizer="sgd", criterion=MSE(), epochs=50, batch_size=100, sample_size=1000, rounds=10, **model_params):
 
     train_input, train_target, test_input, test_target = generate_set(
         sample_size)
     acc = dict()
 
-    if optimizer == "adam":
-        train_acc = empty((rounds)).zero_()
-        val_acc = empty((rounds)).zero_()
-        for lr in model_params["lr"]:
-            for b1 in model_params["beta1"]:
-                for b2 in model_params["beta2"]:
-                    for wd in model_params["weight_decay"]:
-                        for round in range(rounds):
-                            optim = AdamOptimizer(
-                                model, epochs, criterion, batch_size, lr=lr, beta1=b1, beta2=b2, weight_decay=wd)
-                            trained_model, train_losses = optim.train(
-                                train_input, train_target)
+    train_acc = empty((rounds)).zero_()
+    val_acc = empty((rounds)).zero_()
+    for lr in model_params["lr"]:
+        for round in range(rounds):
+            optim = SGDOptimizer(model, epochs, criterion, batch_size, lr=lr)
+            trained_model, train_losses = optim.train(
+                train_input, train_target)
 
-                            train_acc[round] = compute_nb_errors(
-                                trained_model, train_input, train_target) / sample_size
-                            val_acc[round] = compute_nb_errors(
-                                trained_model, test_input, test_target) / sample_size
+            train_acc[round] = compute_nb_errors(
+                trained_model, train_input, train_target) / sample_size
+            val_acc[round] = compute_nb_errors(
+                trained_model, test_input, test_target) / sample_size
 
-                        acc[{"lr": lr, "b1": b1, "b2": b2, "wd": wd}
-                            ] = (train_acc.mean(), val_acc.mean(), train_acc.std(), val_acc.std())
+            acc[lr] = (train_acc.mean(), val_acc.mean(),
+                       train_acc.std(), val_acc.std())
 
         # Pick the best hyperparams
-        best_score = -float('inf')
-        best_param = None
-        for lr in model_params["lr"]:
-            for b1 in model_params["beta1"]:
-                for b2 in model_params["beta2"]:
-                    for wd in model_params["weight_decay"]:
-                        (_, val_acc_mean, _, val_acc_std) = acc[{
-                            "lr": lr, "b1": b1, "b2": b2, "wd": wd}]
-                        if val_acc_mean/val_acc_std > best_score:
-                            best_score = val_acc_mean/val_acc_std
-                            best_param = {
-                                "lr": lr, "b1": b1, "b2": b2, "wd": wd}
+    best_score = -float('inf')
+    best_param = None
+    for lr in model_params["lr"]:
+        (_, val_acc_mean, _, val_acc_std) = acc[lr]
+        if val_acc_mean/val_acc_std > best_score:
+            best_score = val_acc_mean/val_acc_std
+            best_param = {"lr": lr}
 
-        return best_param
-
-    else:
-        train_acc = empty((rounds)).zero_()
-        val_acc = empty((rounds)).zero_()
-        for lr in model_params["lr"]:
-            for round in range(rounds):
-                optim = SGDOptimizer(model, epochs, criterion, batch_size, lr=lr)
-                trained_model, train_losses = optim.train(train_input, train_target)
-
-                train_acc[round] = compute_nb_errors(
-                                    trained_model, train_input, train_target) / sample_size
-                val_acc[round] = compute_nb_errors(
-                                    trained_model, test_input, test_target) / sample_size
-
-                acc[{"lr": lr}] = (train_acc.mean(), val_acc.mean(), train_acc.std(), val_acc.std())
-
-         # Pick the best hyperparams
-        best_score = -float('inf')
-        best_param = None
-        for lr in model_params["lr"]:
-            (_, val_acc_mean, _, val_acc_std) = acc[{"lr": lr}]
-            if val_acc_mean/val_acc_std > best_score:
-                best_score = val_acc_mean/val_acc_std
-                best_param = {"lr": lr}
-
-        return best_param
+    return best_param

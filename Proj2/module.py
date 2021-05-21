@@ -9,11 +9,14 @@ class Module(object):
     def forward(self, *inpt):
         raise NotImplementedError
 
-    def backward(self, * gradwrtoutput):
+    def backward(self, *gradwrtoutput):
         raise NotImplementedError
 
     def param(self):
         return []
 
     def zero_grad(self):
+        pass
+
+    def step(self, lr):
         pass
