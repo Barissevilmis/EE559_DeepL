@@ -52,7 +52,9 @@ def hyperparameter_tuning(model, optimizer="sgd", criterion=MSE(), epochs=50, ba
     val_acc = empty((rounds)).zero_()
     for lr in model_params["lr"]:
         for round in range(rounds):
-            optim = SGDOptimizer(model, epochs, criterion, batch_size, lr=lr)
+            print(f"Round {round}:")
+            optim = SGDOptimizer(model.reset(), epochs,
+                                 criterion, batch_size, lr=lr)
             trained_model, train_losses = optim.train(
                 train_input, train_target)
 

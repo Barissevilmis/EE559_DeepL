@@ -20,3 +20,6 @@ class Module(object):
 
     def step(self, lr):
         pass
+
+    def reset(self):
+        pass

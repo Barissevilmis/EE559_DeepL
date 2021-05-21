@@ -27,7 +27,7 @@ sigmoid_model = Sequential(Linear(2, 25), Sigmoid(),
                            Linear(25, 2), Sigmoid())
 
 
-model_params_sgd = {'lr': [1e-2, 1e-3, 1e-4, 1e-5]}
+model_params_sgd = {'lr': [1e-0, 5e-1, 1e-1, 5e-2, 1e-2, 5e-3, 1e-3]}
 
 
 best_param_sgd_relu = hyperparameter_tuning(relu_model, optimizer="sgd", criterion=MSE(

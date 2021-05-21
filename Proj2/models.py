@@ -6,6 +6,8 @@ import math
 class Linear(Module):
     def __init__(self, *model_params):
 
+        self.model_params = model_params
+
         if model_params[0] < 0.0:
             print('Input neuron size must be positive, set to default 20!')
             self.input_neurons = 20
@@ -58,6 +60,10 @@ class Linear(Module):
         self.weights -= lr*self.grad_weights
         self.bias -= lr*self.grad_bias
 
+    def reset(self):
+        self.zero_grad()
+        self.__init__(*self.model_params)
+
 
 class Sequential(Module):
     def __init__(self, *network_structure):
@@ -94,3 +100,9 @@ class Sequential(Module):
                 if param:
                     res.append(param)
         return res
+
+    def reset(self):
+        for layer in self.network_structure:
+            layer.reset()
+        self.__init__(*self.network_structure)
+        return self
