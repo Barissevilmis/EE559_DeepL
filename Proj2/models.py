@@ -1,3 +1,4 @@
+from torch._C import R
 from torch.autograd import grad
 from module import Module
 from torch import empty
@@ -53,6 +54,13 @@ class Linear(Module):
             self.input_neurons, self.output_neurons).zero_()
         self.grad_bias = empty(1, self.output_neurons).zero_()
 
+    def param(self):
+        res = list()
+        res.append(self.weights)
+        res.append(self.grad_weights)
+        res.append(self.bias)
+        res.append(self.grad_bias)
+        return res
 
 class Sequential(Module):
     def __init__(self, *network_structure):
@@ -75,5 +83,13 @@ class Sequential(Module):
             data = layer.backward(data)
 
     def zero_grad(self):
-        for layer in self.network_structure[::-1]:
+        for layer in self.network_structure:
             layer.zero_grad()
+
+    def param(self):
+        res = list()
+        for layer in self.network_structure:
+            for param in layer.param():
+                if param:
+                    res.append(param)
+        return res
