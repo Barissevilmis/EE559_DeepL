@@ -85,5 +85,26 @@ def hyperparameter_tuning(model, optimizer="adam", criterion=MSE(), epochs=50, b
         return best_param
 
     else:
+        train_acc = empty((rounds)).zero_()
+        val_acc = empty((rounds)).zero_()
         for lr in model_params["lr"]:
             optim = SGDOptimizer(model, epochs, criterion, batch_size, lr=lr)
+            trained_model, train_losses = optim.train(train_input, train_target)
+
+            train_acc[round] = compute_nb_errors(
+                                trained_model, train_input, train_target) / sample_size
+            val_acc[round] = compute_nb_errors(
+                                trained_model, test_input, test_target) / sample_size
+
+            acc[{"lr": lr}] = (train_acc.mean(), val_acc.mean(), train_acc.std(), val_acc.std())
+
+         # Pick the best hyperparams
+        best_score = -float('inf')
+        best_param = None
+        for lr in model_params["lr"]:
+            (_, val_acc_mean, _, val_acc_std) = acc[{"lr": lr}]
+            if val_acc_mean/val_acc_std > best_score:
+                best_score = val_acc_mean/val_acc_std
+                best_param = {"lr": lr}
+
+        return best_param
