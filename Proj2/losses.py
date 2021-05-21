@@ -1,5 +1,5 @@
 from module import Module
-import torch
+
 
 class MSE(Module):
     '''
@@ -9,6 +9,7 @@ class MSE(Module):
     error_i =  f(x_i) - y_i
     Grad(MSE(f(x), y)) = 2 * sum_i=1^N(error_i)
     '''
+
     def __init__(self):
         super().__init__()
         self.pred = None
@@ -18,7 +19,7 @@ class MSE(Module):
         return self.forward(target, pred)
 
     def forward(self, target, pred):
- 
+
         self.target = target.clone()
         self.pred = pred.clone()
         error = self.pred - self.target
@@ -38,6 +39,7 @@ class CrossEntropy(Module):
     error_i = f(x_i) - y_i
     Grad(CE(f(x), y)) = - sum_i=1^N(Softmax(f(x_i)) - I(y_i))
     '''
+
     def __init__(self):
         super().__init__()
         self.pred = None
@@ -47,13 +49,10 @@ class CrossEntropy(Module):
         return self.forward(target, pred)
 
     def forward(self, target, pred):
- 
+
         self.target = target.clone()
         self.pred = pred.clone()
-        return -1 * (self.target * self.pred.log_softmax(dim = 1)).sum() /  target.shape[0]
+        return -1 * (self.target * self.pred.log_softmax(dim=1)).sum() / target.shape[0]
 
     def backward(self):
-        return self.pred.softmax(dim  = 1) - self.target
-
-
-
+        return self.pred.softmax(dim=1) - self.target
