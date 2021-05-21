@@ -26,8 +26,8 @@ class Linear(Module):
             (self.input_neurons, self.output_neurons)).uniform_((-1/math.sqrt(self.input_neurons), +1/math.sqrt(self.input_neurons)))
         self.bias = empty((1, self.output_neurons)).zero_()
 
-        self.grad_weights = empty(self.n_in, self.n_out).zero_()
-        self.grad_bias = empty(1, self.n_out).zero_()
+        self.grad_weights = empty(self.input_neurons, self.output_neurons).zero_()
+        self.grad_bias = empty(1, self.output_neurons).zero_()
 
     def forward(self, *inpt):
 
@@ -40,6 +40,11 @@ class Linear(Module):
         self.grad_weights += self.data.t() @ self.grad_data
         self.grad_bias += self.grad_data.sum(0)
         return self.grad_data @ self.weights.t()
+    
+    def zero_grad(self):
+        self.grad_weights = empty(self.input_neurons, self.output_neurons).zero_()
+        self.grad_bias = empty(1, self.output_neurons).zero_()
+
 
 
 class Sequential(Module):
@@ -58,3 +63,8 @@ class Sequential(Module):
         data = gradwrtoutput[0].clone()
         for layer in self.network_structure[::-1]:
             data = layer.backward(data)
+
+    def zero_grad(self):
+        for layer in self.network_structure[::-1]:
+            layer.zero_grad()
+

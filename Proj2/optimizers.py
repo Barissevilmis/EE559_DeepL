@@ -44,7 +44,7 @@ class _Optimizer_:
             epoch_loss = 0.0
 
             for curr_batch in range(0, train_input_batches.shape[0]):
-                self.model.zero_grad()
+                self.zero_grad()
 
                 pred = self.model(train_input_batches[curr_batch])
                 loss = self.criterion(train_target_batches[curr_batch], pred)
@@ -61,6 +61,9 @@ class _Optimizer_:
 
     def step(self):
         raise NotImplementedError
+
+    def zero_grad(self):
+        self.model.zero_grad()
 
 
 class AdamOptimizer(_Optimizer_):
