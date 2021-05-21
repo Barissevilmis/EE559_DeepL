@@ -43,11 +43,12 @@ class _Optimizer_:
         for epoch in range(self.epochs):
             epoch_loss = 0.0
 
-            for curr_batch in range(0, train_input_batches.shape[0]):
+            print(train_input_batches)
+            for batch_id, curr_batch in enumerate(train_input_batches):
                 self.zero_grad()
 
-                pred = self.model(train_input_batches[curr_batch])
-                loss = self.criterion(train_target_batches[curr_batch], pred)
+                pred = self.model(curr_batch)
+                loss = self.criterion(curr_batch, pred)
                 grad = self.criterion.backward()
                 self.model.backward(grad)
                 self.step()

@@ -5,25 +5,25 @@ import math
 
 
 class Linear(Module):
-    def __init__(self, **model_params):
+    def __init__(self, *model_params):
 
-        if model_params['input_neurons'] < 0.0:
+        if model_params[0] < 0.0:
             print('Input neuron size must be positive, set to default 20!')
             self.input_neurons = 20
         else:
-            self.input_neurons = int(model_params['input_neurons'])
+            self.input_neurons = int(model_params[0])
 
-        if model_params['output_neurons'] < 0.0:
+        if model_params[1] < 0.0:
             print('Output neuron size must be positive, set to default 20!')
             self.output_neurons = 20
         else:
-            self.output_neurons = int(model_params['output_neurons'])
+            self.output_neurons = int(model_params[1])
 
         super().__init__()
 
         # Always use Xavier initialization
         self.weights = empty(
-            (self.input_neurons, self.output_neurons)).uniform_((-1/math.sqrt(self.input_neurons), +1/math.sqrt(self.input_neurons)))
+            (self.input_neurons, self.output_neurons)).uniform_(-1/math.sqrt(self.input_neurons), +1/math.sqrt(self.input_neurons))
         self.bias = empty((1, self.output_neurons)).zero_()
 
         self.grad_weights = empty(self.input_neurons, self.output_neurons).zero_()
