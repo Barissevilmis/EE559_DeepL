@@ -39,6 +39,7 @@ class _Optimizer_:
         train_target_batches = train_target.split(
             split_size=self.batch_size, dim=0)
 
+        epoch_losses = empty((self.epochs)).zero_()
         for epoch in range(self.epochs):
             epoch_loss = 0.0
 
@@ -53,9 +54,10 @@ class _Optimizer_:
 
                 epoch_loss += loss
 
+            epoch_losses[epoch] = epoch_loss
             print("Epoch " + str(epoch) + ", Train loss: " + str(epoch_loss))
 
-        return self.model
+        return self.model, epoch_losses
 
     def step(self):
         raise NotImplementedError
