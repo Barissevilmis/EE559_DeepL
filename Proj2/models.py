@@ -56,10 +56,7 @@ class Linear(Module):
 
     def param(self):
         res = list()
-        res.append(self.weights)
-        res.append(self.grad_weights)
-        res.append(self.bias)
-        res.append(self.grad_bias)
+        res.append((self.weights,self.bias,self.grad_weights,self.grad_bias))
         return res
 
 class Sequential(Module):

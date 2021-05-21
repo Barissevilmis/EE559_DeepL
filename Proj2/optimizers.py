@@ -94,26 +94,7 @@ class SGDOptimizer(_Optimizer_):
     def step(self, closure: Optional[Callable[[], float]] = ...) -> Optional[float]:
 
         # Iterate over parameter groups
-        for pg in self.param_groups:
+        for (w, b, gw, gb) in self.model.param():
 
-            # Get all hyper parameters
-            lr = pg['lr']
-            wd = pg['weight_decay']
-            params = pg['params']
-
-            # Iterate over parameters in the group
-            for p in params:
-
-                # Get param within state
-                state_p = self.state[p]
-
-                # Increment step by 1
-                state_p['step'] += 1
-                grad = p.grad.data
-
-                # Only need to continue on parameters with gradient
-                if grad is None:
-                    continue
-
-                # Update parameters
-                p.data = p.data - lr * grad
+            w = w - self.lr * gw
+            b = b - self.lr * gb
