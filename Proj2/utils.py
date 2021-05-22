@@ -1,9 +1,6 @@
-from optimizers import SGDOptimizer
+from optimizers import SGDOptimizer, AdamOptimizer
 from torch import empty
-import torch
 import math
-from models import Linear, Sequential
-from activations import ReLU, Tanh, Sigmoid
 from losses import MSE
 
 
@@ -56,29 +53,71 @@ def hyperparameter_tuning(model, optimizer="sgd", criterion=MSE(), epochs=50, ba
 
     train_acc = empty((rounds)).zero_()
     val_acc = empty((rounds)).zero_()
-    for lr in model_params["lr"]:
-        for round in range(rounds):
-            print(f"Round {round}:")
-            optim = SGDOptimizer(model.reset(), epochs,
-                                 criterion, batch_size, lr=lr)
-            trained_model, train_losses = optim.train(
-                train_input, train_target)
 
-            train_acc[round] = compute_nb_errors(
-                trained_model, train_input, train_target) / sample_size
-            val_acc[round] = compute_nb_errors(
-                trained_model, test_input, test_target) / sample_size
+    if optimizer == "sgd":
+        for lr in model_params["lr"]:
+            for round in range(rounds):
+                print(f"Round {round}:")
+                optim = SGDOptimizer(model.reset(), epochs,
+                                     criterion, batch_size, lr=lr)
+                trained_model, train_losses = optim.train(
+                    train_input, train_target)
 
-            acc[lr] = (train_acc.mean(), val_acc.mean(),
-                       train_acc.std(), val_acc.std())
+                train_acc[round] = compute_nb_errors(
+                    trained_model, train_input, train_target) / sample_size
+                val_acc[round] = compute_nb_errors(
+                    trained_model, test_input, test_target) / sample_size
+
+                acc[lr] = (train_acc.mean(), val_acc.mean(),
+                           train_acc.std(), val_acc.std())
 
         # Pick the best hyperparams
-    best_score = -float('inf')
-    best_param = None
-    for lr in model_params["lr"]:
-        (_, val_acc_mean, _, val_acc_std) = acc[lr]
-        if val_acc_mean/val_acc_std > best_score:
-            best_score = val_acc_mean/val_acc_std
-            best_param = {"lr": lr}
+        best_score = -float('inf')
+        best_param = None
+        for lr in model_params["lr"]:
+            (_, val_acc_mean, _, val_acc_std) = acc[lr]
+            if val_acc_mean/val_acc_std > best_score:
+                best_score = val_acc_mean/val_acc_std
+                best_param = {"lr": lr}
 
-    return best_param
+        return best_param
+
+    # Adam
+    else:
+        for lr in model_params["lr"]:
+            for wd in model_params["wd"]:
+                for b1 in model_params["b1"]:
+                    for b2 in model_params["b2"]:
+                        for round in range(rounds):
+                            print(f"Round {round}:")
+                            optim = AdamOptimizer(model.reset(), epochs,
+                                                  criterion, batch_size, lr=lr, weight_decay=wd, beta1=b1, beta2=b2)
+                            trained_model, train_losses = optim.train(
+                                train_input, train_target)
+
+                            train_acc[round] = compute_nb_errors(
+                                trained_model, train_input, train_target) / sample_size
+                            val_acc[round] = compute_nb_errors(
+                                trained_model, test_input, test_target) / sample_size
+
+                            acc[f"{lr},{wd},{b1},{b2}"] = (train_acc.mean(), val_acc.mean(),
+                                                           train_acc.std(), val_acc.std())
+
+        # Pick the best hyperparams
+        best_score = -float('inf')
+        best_param = None
+        for lr in model_params["lr"]:
+            for wd in model_params["wd"]:
+                for b1 in model_params["b1"]:
+                    for b2 in model_params["b2"]:
+                        (_, val_acc_mean, _,
+                         val_acc_std) = acc[f"{lr},{wd},{b1},{b2}"]
+                        if val_acc_mean/val_acc_std > best_score:
+                            best_score = val_acc_mean/val_acc_std
+                            best_param = {
+                                "lr": lr,
+                                "wd": wd,
+                                "b1": b1,
+                                "b2": b2
+                            }
+        return best_param
