@@ -3,7 +3,7 @@ import json
 import math
 from models import Linear, Sequential
 from activations import ReLU, Tanh, Sigmoid
-from losses import MSE, CrossEntropy
+from losses import MSE
 from utils import generate_set, hyperparameter_tuning
 
 
@@ -27,11 +27,16 @@ sigmoid_model = Sequential(Linear(2, 25), Sigmoid(),
                            Linear(25, 2), Sigmoid())
 
 
-model_params_sgd = {'lr': [1e-0, 5e-1, 1e-1, 5e-2, 1e-2, 5e-3, 1e-3]}
+model_params_sgd = {'lr': [1e-1]}
 
 
-best_param_sgd_relu = hyperparameter_tuning(relu_model, optimizer="sgd", criterion=MSE(
-), epochs=50, batch_size=100, sample_size=1000, rounds=10, **model_params_sgd)
+best_param_sgd_relu, train_acc, val_acc = hyperparameter_tuning(relu_model, optimizer="sgd", criterion=MSE(
+), epochs=100, batch_size=100, sample_size=1000, rounds=10, **model_params_sgd)
+
+print(train_acc)
+print(val_acc)
+
+exit(0)
 
 with open('best_param_sgd_relu.txt', 'w') as file:
     json.dump(best_param_sgd_relu, file)

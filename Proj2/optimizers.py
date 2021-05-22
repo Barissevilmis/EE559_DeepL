@@ -1,5 +1,5 @@
 from typing import Optional, Callable
-from losses import MSE, CrossEntropy
+from losses import MSE
 import math
 from torch import empty
 
@@ -47,7 +47,8 @@ class _Optimizer_:
                 self.model.zero_grad()
 
                 pred = self.model(curr_batch)
-                loss = self.criterion(curr_batch, pred)
+                # print(train_target_batches[batch_id].shape)
+                loss = self.criterion(train_target_batches[batch_id], pred)
                 grad = self.criterion.backward()
                 self.model.backward(grad)
                 self.step()

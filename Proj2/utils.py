@@ -1,9 +1,10 @@
 from optimizers import SGDOptimizer
 from torch import empty
+import torch
 import math
 from models import Linear, Sequential
 from activations import ReLU, Tanh, Sigmoid
-from losses import MSE, CrossEntropy
+from losses import MSE
 
 
 def generate_set(sample=1000):
@@ -15,10 +16,12 @@ def generate_set(sample=1000):
     train_data = empty(sample, 2).uniform_(0, 1)
     train_target = train_data.sub(0.5).pow(2).sum(1) < 1/(2*math.pi)
     train_target = train_target.int()
+    train_target = train_target[:, None]
     # Testing set
     test_data = empty(sample, 2).uniform_(0, 1)
     test_target = test_data.sub(0.5).pow(2).sum(1) < 1/(2*math.pi)
     test_target = test_target.int()
+    test_target = test_target[:, None]
     return train_data, train_target, test_data, test_target
 
 
@@ -34,7 +37,7 @@ def compute_nb_errors(model, data_input, data_target, batch_size=100):
 
         pred = model(data_input.narrow(0, b, batch_size))
 
-        _, predicted_classes = pred.max(1)
+        predicted_classes = pred.round()
         for k in range(batch_size):
             if data_target[b + k] != predicted_classes[k]:
                 nb_data_errors += 1
