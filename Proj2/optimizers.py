@@ -1,5 +1,6 @@
 from losses import MSE
 from torch import empty
+import math
 
 
 class _Optimizer_:
@@ -148,14 +149,14 @@ class AdamOptimizer(_Optimizer_):
             vw = self.beta2 * vw + (1-self.beta2) * (gw.clone() ** 2)
             vb = self.beta2 * vb + (1-self.beta2) * (vb.clone() ** 2)
 
-            mw_corr = mw / (1 - (self.beta1 ** self.step_size))
-            mb_corr = mb / (1 - (self.beta1 ** self.step_size))
+            bias_corr1 = 1 - (self.beta1 ** self.step_size)
+            bias_corr2 = 1 - (self.beta2 ** self.step_size)
+            
+            bias_corr = math.sqrt(bias_corr2) / bias_corr1
+            alpha = self.lr * bias_corr
 
-            vw_corr = vw / (1 - (self.beta2 ** self.step_size))
-            vb_corr = vb / (1 - (self.beta2 ** self.step_size))
-
-            w -= (self.lr * mw_corr) / (vw_corr.sqrt() + self.eps)
-            b -= (self.lr * mb_corr) / (vb_corr.sqrt() + self.eps)
+            w = w - alpha * mw / (vw.sqrt() + self.eps)
+            b = b - alpha * mb / (vb.sqrt() + self.eps)
 
         self.step_size += 1
-        self.model.step(self.lr)
+    
