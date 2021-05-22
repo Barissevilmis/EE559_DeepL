@@ -47,7 +47,7 @@ class _Optimizer_:
                 self.model.zero_grad()
 
                 pred = self.model(curr_batch)
-                # print(train_target_batches[batch_id].shape)
+                # Calculate loss from criterion with predicted classes and target classes
                 loss = self.criterion(train_target_batches[batch_id], pred)
                 grad = self.criterion.backward()
                 self.model.backward(grad)
@@ -61,7 +61,7 @@ class _Optimizer_:
         return self.model, epoch_losses
 
     def step(self):
-        raise NotImplementedError
+        self.model.step(self.lr)
 
 
 class SGDOptimizer(_Optimizer_):
@@ -87,8 +87,3 @@ class SGDOptimizer(_Optimizer_):
             self.batch_size = batch_size
 
         super().__init__(model, epochs, criterion, batch_size, lr)
-
-    def step(self, closure: Optional[Callable[[], float]] = ...) -> Optional[float]:
-
-        # Iterate over parameter groups
-        self.model.step(self.lr)

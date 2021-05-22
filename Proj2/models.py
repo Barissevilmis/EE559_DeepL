@@ -82,7 +82,7 @@ class Sequential(Module):
 
     def backward(self, *gradwrtoutput):
         data = gradwrtoutput[0].clone()
-        for layer in self.network_structure[::-1]:
+        for layer in self.network_structure[::-1]:  # List reversed
             data = layer.backward(data)
 
     def zero_grad(self):

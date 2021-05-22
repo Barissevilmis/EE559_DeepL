@@ -26,7 +26,7 @@ optim.train(train_input, train_target)
 
 err_acc = 1 - compute_nb_errors(
     relu_model, test_input, test_target)/1000
-print(f"nb_err_test: {err_acc}")
+print(f"Test accuracy: {err_acc}")
 err_train = 1 - compute_nb_errors(
     relu_model, train_input, train_target)/1000
-print(f"nb_err_train: {err_train}")
+print(f"Train accuracy: {err_train}")
