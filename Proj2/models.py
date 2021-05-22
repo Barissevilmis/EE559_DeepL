@@ -4,6 +4,17 @@ import math
 
 
 class Linear(Module):
+    '''
+    This module implements Linear / Dense / Fully Connected layer.
+    __init__():  - A default dense layer is set as 20 input and 20 output neurons: User should specify the neuron amount(in + out) as constructer argument
+                 - Xavier initialization used as default initializarion
+    init_adam(): - SGD or Adam optimizer could be picked as optimizers -> In case of Adam: create variables for m and v moment parameters for both bias and weights
+    forward():   - (__call__(): enables model() to be act as model.forward()): f(x_i) = x_i * W + b
+    backward():  - Backward propagation: Grad(f(x_i)) = Grad(x_i+1) * W^T
+    zero_grad(): - W and b are zeroed out
+    param():     - SGD -> Return W, b Grad(W), Grad(b) | Adam -> Return W, b, Grad(W), Grad(b), M_moment(W), M_moment(b), V_moment(W), V_moment(b)
+    reset():     - During hyperparameter training, model needs to reset between rounds
+    '''
     def __init__(self, *model_params):
 
         self.model_params = model_params
@@ -81,6 +92,16 @@ class Linear(Module):
 
 
 class Sequential(Module):
+    '''
+    This module implements Sequential: Combining and building dense networks .
+    __init__():  - Network Structure, layer by layer with activations -> Network merges linear and activations after each other 
+    init_adam(): - Activate Adam optimizer over the network
+    forward():   - Calls each layers .forward() in incrementing order
+    backward():  - Calls each layers .backward() in descending order
+    zero_grad(): - Zero_grad called each layer in incrementing order
+    param():     - Returns param() for each layer in incrementing order
+    reset():     - During hyperparameter training, model needs to reset between rounds: Call each reset within network
+    '''
     def __init__(self, *network_structure):
         self.network_structure = network_structure
         super().__init__()

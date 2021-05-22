@@ -3,7 +3,7 @@ from module import Module
 
 class ReLU(Module):
     ''' 
-    ReLU activation function: f(x) = max(0,x_i)
+    ReLU activation function: f(x_i) = max(0,x_i)
     Forward: f(x_i) = max(0,x_i) return f(x_i)
     Backward: Grad(f(x_i)) = I(x_i > 0.0) * Grad(x_i+1)
     '''
