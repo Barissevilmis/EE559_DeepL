@@ -11,13 +11,14 @@ torch.set_grad_enabled(False)
 train_input, train_target, test_input, test_target = generate_set(1000)
 
 
-# A distinct model for every different activation function
+# Choose the best model
 relu_model = Sequential(Linear(2, 25), ReLU(),
                         Linear(25, 25), ReLU(),
                         Linear(25, 25), ReLU(),
                         Linear(25, 1), Sigmoid())
 
 
+# Choose the best optimizer and its parameters from hyperparam tuning step
 optim = AdamOptimizer(relu_model, epochs=100,
                       criterion=MSE(), batch_size=100, lr=0.001, beta1=0.5, beta2=0.9)
 _, train_losses, val_losses, train_acc, val_acc = optim.train(
