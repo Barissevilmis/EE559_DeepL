@@ -1,11 +1,14 @@
-import json
+import torch
 from models import Linear, Sequential
-from activations import ReLU, Tanh, Sigmoid
+from activations import ReLU, Sigmoid
 from losses import MSE
-from hyperparam_tuning import hyperparameter_tuning
-from torch import set_grad_enabled
+from utils import generate_set
+from optimizers import AdamOptimizer
 
-set_grad_enabled(False)
+torch.set_grad_enabled(False)
+
+
+train_input, train_target, test_input, test_target = generate_set(1000)
 
 
 # A distinct model for every different activation function
@@ -14,59 +17,23 @@ relu_model = Sequential(Linear(2, 25), ReLU(),
                         Linear(25, 25), ReLU(),
                         Linear(25, 1), Sigmoid())
 
-tanh_model = Sequential(Linear(2, 25), Tanh(),
-                        Linear(25, 25), Tanh(),
-                        Linear(25, 25), Tanh(),
-                        Linear(25, 1), Sigmoid())
 
-sigmoid_model = Sequential(Linear(2, 25), Sigmoid(),
-                           Linear(25, 25), Sigmoid(),
-                           Linear(25, 25), Sigmoid(),
-                           Linear(25, 1), Sigmoid())
+optim = AdamOptimizer(relu_model, epochs=100,
+                      criterion=MSE(), batch_size=100, lr=0.001, beta1=0.5, beta2=0.9)
+_, train_losses, val_losses, train_acc, val_acc = optim.train(
+    train_input, train_target, test_input, test_target)
 
-run_sgd = input("Do you want to tune parameters for SGD? (Y/N): ")
-run_adam = input("Do you want to tune parameters for Adam? (Y/N): ")
+print("\n\n**************FINAL TRAIN AND TEST LOSSES**************\n")
 
-if run_sgd == "Y":
+print(f"Final train loss: {train_losses[-1].item()}")
+print(f"Final validation loss: {val_losses[-1].item()}")
+print(f"Final train accuracy: {train_acc[-1].item()}")
+print(f"Final validation accuracy: {val_acc[-1].item()}")
 
-    model_params_sgd = {'lr': [0.9, 0.5, 0.1, 1e-2]}
+save_params = input("Do you want to save losses and accuracies? (Y/N): ")
 
-    best_param_sgd_relu = hyperparameter_tuning(relu_model, optimizer="sgd", criterion=MSE(
-    ), epochs=100, batch_size=100, sample_size=1000, rounds=10, **model_params_sgd)
-
-    with open('best_param_sgd_relu.txt', 'w') as file:
-        json.dump(best_param_sgd_relu, file)
-    best_param_sgd_tanh = hyperparameter_tuning(tanh_model, optimizer="sgd", criterion=MSE(
-    ), epochs=100, batch_size=100, sample_size=1000, rounds=10, **model_params_sgd)
-    with open('best_param_sgd_tanh.txt', 'w') as file:
-        json.dump(best_param_sgd_tanh, file)
-
-    best_param_sgd_sigmoid = hyperparameter_tuning(sigmoid_model,  optimizer="sgd", criterion=MSE(
-    ), epochs=100, batch_size=100, sample_size=1000, rounds=10, **model_params_sgd)
-
-    with open('best_param_sgd_sigmoid.txt', 'w') as file:
-        json.dump(best_param_sgd_sigmoid, file)
-
-if run_adam == "Y":
-
-    model_params_adam = {
-        'lr': [1e-1, 1e-2, 1e-3],
-        'b1': [0.9, 0.5, 0.2],
-        'b2': [0.999, 0.9, 0.5]
-    }
-
-    best_param_adam_relu = hyperparameter_tuning(relu_model, optimizer="adam", criterion=MSE(
-    ), epochs=100, batch_size=100, sample_size=1000, rounds=10, **model_params_adam)
-
-    with open('best_param_adam_relu.txt', 'w') as file:
-        json.dump(best_param_adam_relu, file)
-    best_param_adam_tanh = hyperparameter_tuning(tanh_model, optimizer="adam", criterion=MSE(
-    ), epochs=100, batch_size=100, sample_size=1000, rounds=10, **model_params_adam)
-    with open('best_param_adam_tanh.txt', 'w') as file:
-        json.dump(best_param_adam_tanh, file)
-
-    best_param_adam_sigmoid = hyperparameter_tuning(sigmoid_model,  optimizer="adam", criterion=MSE(
-    ), epochs=100, batch_size=100, sample_size=1000, rounds=10, **model_params_adam)
-
-    with open('best_param_adam_sigmoid.txt', 'w') as file:
-        json.dump(best_param_adam_sigmoid, file)
+if save_params == "Y":
+    torch.save(train_losses, 'best_train_losses.pt')
+    torch.save(val_losses, 'best_val_losses.pt')
+    torch.save(train_acc, 'best_train_acc.pt')
+    torch.save(val_acc, 'best_val_acc.pt')
