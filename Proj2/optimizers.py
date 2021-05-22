@@ -147,16 +147,17 @@ class AdamOptimizer(_Optimizer_):
             mb = self.beta1 * mb + (1-self.beta1) * gb.clone()
 
             vw = self.beta2 * vw + (1-self.beta2) * (gw.clone() ** 2)
-            vb = self.beta2 * vb + (1-self.beta2) * (vb.clone() ** 2)
+            vb = self.beta2 * vb + (1-self.beta2) * (gb.clone() ** 2)
 
-            bias_corr1 = 1 - (self.beta1 ** self.step_size)
-            bias_corr2 = 1 - (self.beta2 ** self.step_size)
+            bias_corrw1 = mw / (1 - (self.beta1 ** self.step_size))
+            bias_corrw2 = vw / (1 - (self.beta2 ** self.step_size))
+
+            bias_corrb1 = mb / (1 - (self.beta1 ** self.step_size))
+            bias_corrb2 = vb / (1 - (self.beta2 ** self.step_size))
             
-            bias_corr = math.sqrt(bias_corr2) / bias_corr1
-            alpha = self.lr * bias_corr
-
-            w = w - alpha * mw / (vw.sqrt() + self.eps)
-            b = b - alpha * mb / (vb.sqrt() + self.eps)
+        
+            w -= self.lr * bias_corrw1 / (bias_corrw2.sqrt() + self.eps)
+            b -= self.lr * bias_corrb1 / (bias_corrb2.sqrt() + self.eps)
 
         self.step_size += 1
     
