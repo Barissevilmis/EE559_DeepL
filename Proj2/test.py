@@ -2,7 +2,10 @@ import json
 from models import Linear, Sequential
 from activations import ReLU, Tanh, Sigmoid
 from losses import MSE
-from utils import hyperparameter_tuning
+from hyperparam_tuning import hyperparameter_tuning
+from torch import set_grad_enabled
+
+set_grad_enabled(False)
 
 
 # A distinct model for every different activation function
@@ -47,8 +50,7 @@ if run_sgd == "Y":
 if run_adam == "Y":
 
     model_params_adam = {
-        # 'lr': [0.5, 0.1, 1e-2],
-        'lr': [0.9],
+        'lr': [1e-1, 1e-2, 1e-3],
         'b1': [0.9, 0.5, 0.2],
         'b2': [0.999, 0.9, 0.5]
     }

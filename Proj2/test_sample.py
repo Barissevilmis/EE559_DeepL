@@ -2,8 +2,8 @@ import torch
 from models import Linear, Sequential
 from activations import ReLU, Sigmoid
 from losses import MSE
-from utils import generate_set, compute_nb_errors
-from optimizers import SGDOptimizer
+from utils import generate_set
+from optimizers import AdamOptimizer
 
 torch.set_grad_enabled(False)
 
@@ -18,13 +18,17 @@ relu_model = Sequential(Linear(2, 25), ReLU(),
                         Linear(25, 1), Sigmoid())
 
 
-optim = SGDOptimizer(relu_model, epochs=100,
-                     criterion=MSE(), batch_size=100, lr=0.8)
-optim.train(train_input, train_target)
+optim = AdamOptimizer(relu_model, epochs=100,
+                      criterion=MSE(), batch_size=100, lr=0.001, beta1=0.5, beta2=0.9)
+_, train_losses, val_losses, train_acc, val_acc = optim.train(
+    train_input, train_target, test_input, test_target)
 
-err_acc = 1 - compute_nb_errors(
-    relu_model, test_input, test_target)/1000
-print(f"Test accuracy: {err_acc}")
-err_train = 1 - compute_nb_errors(
-    relu_model, train_input, train_target)/1000
-print(f"Train accuracy: {err_train}")
+print(f"Train losses: {train_losses}")
+print(f"Val losses: {val_losses}")
+print(f"Train accuracy: {train_acc}")
+print(f"Val accuracy: {val_acc}")
+
+torch.save(train_losses, 'best_train_losses.pt')
+torch.save(val_losses, 'best_val_losses.pt')
+torch.save(train_acc, 'best_train_acc.pt')
+torch.save(val_acc, 'best_val_acc.pt')
