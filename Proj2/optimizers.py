@@ -30,7 +30,7 @@ class _Optimizer_:
             self.lr = 1e-2
         else:
             self.lr = float(lr)
-        
+
         if optim_method == 'adam':
             self.model.init_adam()
 
@@ -103,11 +103,7 @@ class AdamOptimizer(_Optimizer_):
     Optimize by step(): decrease by learning rate * gradient
     '''
 
-<<<<<<< HEAD
-    def __init__(self, model, epochs=100, criterion=MSE(), batch_size=1, lr=1e-2, beta1 = 0.9, beta2 = 0.999, weight_decay = 0.0, eps = 1e-8):
-=======
-    def __init__(self, model, epochs=100, criterion=MSE(), batch_size=1, lr=1e-1, beta1=0.9, beta2=0.999, weight_decay=0.0, epsilon=1e-8):
->>>>>>> f5d5cbdaf65ba986021550c08d8f571c3d2454c5
+    def __init__(self, model, epochs=100, criterion=MSE(), batch_size=1, lr=1e-2, beta1=0.9, beta2=0.999, weight_decay=0.0, eps=1e-8):
 
         if(lr < 0.0):
             self.lr = 1e-2
@@ -148,16 +144,15 @@ class AdamOptimizer(_Optimizer_):
         self.step_size = 0
 
         super().__init__(model, epochs, criterion, batch_size, lr, 'adam')
-        
+
     def step(self):
-<<<<<<< HEAD
 
         for (w, b, gw, gb, mw, mb, vw, vb) in self.model.param():
 
             mw = self.beta1 * mw + (1-self.beta1) * gw.clone()
             mb = self.beta1 * mb + (1-self.beta1) * gb.clone()
 
-            vw = self.beta2 * vw + (1-self.beta2) * (gw.clone() ** 2) 
+            vw = self.beta2 * vw + (1-self.beta2) * (gw.clone() ** 2)
             vb = self.beta2 * vb + (1-self.beta2) * (vb.clone() ** 2)
 
             mw_corr = mw / (1 - (self.beta1 ** self.step_size))
@@ -170,6 +165,4 @@ class AdamOptimizer(_Optimizer_):
             b -= ((self.lr * mb_corr) / (vb_corr.sqrt() + self.eps))
 
         self.step_size += 1
-=======
         self.model.step(self.lr)
->>>>>>> f5d5cbdaf65ba986021550c08d8f571c3d2454c5
