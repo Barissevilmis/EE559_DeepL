@@ -5,7 +5,10 @@ from utils import compute_nb_errors
 
 class _Optimizer_:
     '''
-    Optimizer: Superclass for Adam and SGD
+    Optimizer: - Superclass for Adam and SGD
+    Train:     - Training of model by batches for given amount of epochs
+               - Zero_grad -> Forward -> Loss -> Backward -> Step
+    Choices:   - SGD or Adam
     '''
 
     def __init__(self, model, epochs, criterion, batch_size, lr, optim_method):
@@ -85,17 +88,16 @@ class _Optimizer_:
 
 class SGDOptimizer(_Optimizer_):
     '''
-    Mini batch SGD optimizer: Only  parameters learning rate
-    Learning rate: 5e-1 by default
-    Optimize by step(): decrease by learning rate * gradient
+    Mini batch SGD optimizer: - Only  parameters learning rate
+    Learning rate:            - 5e-1 by default
+    Optimize by step():       - decrease by learning_rate * gradient
     '''
 
     def __init__(self, model, epochs=100, criterion=MSE(), batch_size=1, lr=5e-1):
 
         if(lr < 0.0):
             self.lr = 1e-2
-            print(
-                "Learning rate set to default (1e-2) due to negative learning rate input!")
+            print("Learning rate set to default (1e-2) due to negative learning rate input!")
         else:
             self.lr = lr
 
@@ -116,9 +118,12 @@ class SGDOptimizer(_Optimizer_):
 
 class AdamOptimizer(_Optimizer_):
     '''
-    Adam optimizer: Parameters learning rate, beta1, beta2, epsilon
-    Learning rate: 1e-3 by default
-    Optimize by step(): decrease by learning rate * gradient
+    Adam optimizer:     - Parameters learning rate, beta1, beta2, epsilon
+    Learning rate:      - 1e-3 by default
+    Beta1 & Beta2:      - Momentum computation parameters, 0.9 and 0.999 by default 
+    Epsilon:            - Final parameter update  -> denominator
+    Optimize by step(): - m and v moment updates -> bias corrections -> update weights and bias
+
     '''
 
     def __init__(self, model, epochs=100, criterion=MSE(), batch_size=1, lr=1e-3, beta1=0.9, beta2=0.999, eps=1e-8):
