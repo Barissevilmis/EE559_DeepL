@@ -117,3 +117,7 @@ class Sequential(Module):
             layer.reset()
         self.__init__(*self.network_structure)
         return self
+
+    def init_adam(self):
+        for layer in self.network_structure:
+            layer.init_adam()

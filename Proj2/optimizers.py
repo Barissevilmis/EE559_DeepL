@@ -54,7 +54,6 @@ class _Optimizer_:
                 grad = self.criterion.backward()
                 self.model.backward(grad)
                 self.step()
-
                 epoch_loss += loss.item()
 
             epoch_losses[epoch] = epoch_loss
@@ -98,12 +97,12 @@ class SGDOptimizer(_Optimizer_):
 
 class AdamOptimizer(_Optimizer_):
     '''
-    Adam optimizer: Parameters learning rate, beta1, beta2, weight_decay, epsilon
+    Adam optimizer: Parameters learning rate, beta1, beta2, epsilon
     Learning rate: 1e-1 by default
     Optimize by step(): decrease by learning rate * gradient
     '''
 
-    def __init__(self, model, epochs=100, criterion=MSE(), batch_size=1, lr=1e-2, beta1=0.9, beta2=0.999, weight_decay=0.0, eps=1e-8):
+    def __init__(self, model, epochs=100, criterion=MSE(), batch_size=1, lr=1e-2, beta1=0.9, beta2=0.999, eps=1e-8):
 
         if(lr < 0.0):
             self.lr = 1e-2
@@ -124,12 +123,6 @@ class AdamOptimizer(_Optimizer_):
         else:
             self.beta2 = beta2
 
-        if(weight_decay < 0.0):
-            self.weight_decay = 0.0
-            print("Weight decay set to default (0.0) due to negative weight decay input!")
-        else:
-            self.weight_decay = weight_decay
-
         if(eps < 0.0):
             self.eps = 1e-8
             print("Epsilon set to default (1e-8) due to negative epsilon input!")
@@ -141,7 +134,7 @@ class AdamOptimizer(_Optimizer_):
             print("Mini batch size set to default (1) due to negative batch size input!")
         else:
             self.batch_size = batch_size
-        self.step_size = 0
+        self.step_size = 1
 
         super().__init__(model, epochs, criterion, batch_size, lr, 'adam')
 
@@ -161,8 +154,8 @@ class AdamOptimizer(_Optimizer_):
             vw_corr = vw / (1 - (self.beta2 ** self.step_size))
             vb_corr = vb / (1 - (self.beta2 ** self.step_size))
 
-            w -= ((self.lr * mw_corr) / (vw_corr.sqrt() + self.eps))
-            b -= ((self.lr * mb_corr) / (vb_corr.sqrt() + self.eps))
+            w -= (self.lr * mw_corr) / (vw_corr.sqrt() + self.eps)
+            b -= (self.lr * mb_corr) / (vb_corr.sqrt() + self.eps)
 
         self.step_size += 1
         self.model.step(self.lr)

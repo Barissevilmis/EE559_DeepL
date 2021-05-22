@@ -23,3 +23,6 @@ class Module(object):
 
     def reset(self):
         pass
+
+    def init_adam(self):
+        pass

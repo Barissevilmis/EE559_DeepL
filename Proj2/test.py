@@ -2,10 +2,7 @@ import json
 from models import Linear, Sequential
 from activations import ReLU, Tanh, Sigmoid
 from losses import MSE
-from utils import generate_set, hyperparameter_tuning
-
-
-train_input, train_target, test_input, test_target = generate_set(1000)
+from utils import hyperparameter_tuning
 
 
 # A distinct model for every different activation function
@@ -24,29 +21,50 @@ sigmoid_model = Sequential(Linear(2, 25), Sigmoid(),
                            Linear(25, 25), Sigmoid(),
                            Linear(25, 1), Sigmoid())
 
+run_sgd = input("Do you want to tune parameters for SGD? (Y/N): ")
+run_adam = input("Do you want to tune parameters for Adam? (Y/N): ")
 
-model_params_sgd = {'lr': [1e-1]}
+if run_sgd == "Y":
 
+    model_params_sgd = {'lr': [0.9, 0.5, 0.1, 1e-2]}
 
-best_param_sgd_relu, train_acc, val_acc = hyperparameter_tuning(relu_model, optimizer="sgd", criterion=MSE(
-), epochs=100, batch_size=100, sample_size=1000, rounds=10, **model_params_sgd)
+    best_param_sgd_relu = hyperparameter_tuning(relu_model, optimizer="sgd", criterion=MSE(
+    ), epochs=100, batch_size=100, sample_size=1000, rounds=10, **model_params_sgd)
 
-print(train_acc)
-print(val_acc)
+    with open('best_param_sgd_relu.txt', 'w') as file:
+        json.dump(best_param_sgd_relu, file)
+    best_param_sgd_tanh = hyperparameter_tuning(tanh_model, optimizer="sgd", criterion=MSE(
+    ), epochs=100, batch_size=100, sample_size=1000, rounds=10, **model_params_sgd)
+    with open('best_param_sgd_tanh.txt', 'w') as file:
+        json.dump(best_param_sgd_tanh, file)
 
-exit(0)
+    best_param_sgd_sigmoid = hyperparameter_tuning(sigmoid_model,  optimizer="sgd", criterion=MSE(
+    ), epochs=100, batch_size=100, sample_size=1000, rounds=10, **model_params_sgd)
 
-with open('best_param_sgd_relu.txt', 'w') as file:
-    json.dump(best_param_sgd_relu, file)
+    with open('best_param_sgd_sigmoid.txt', 'w') as file:
+        json.dump(best_param_sgd_sigmoid, file)
 
-best_param_sgd_tanh = hyperparameter_tuning(tanh_model, optimizer="sgd", criterion=MSE(
-), epochs=50, batch_size=100, sample_size=1000, rounds=10, **model_params_sgd)
+if run_adam == "Y":
 
-with open('best_param_sgd_tanh.txt', 'w') as file:
-    json.dump(best_param_sgd_tanh, file)
+    model_params_adam = {
+        # 'lr': [0.5, 0.1, 1e-2],
+        'lr': [0.9],
+        'b1': [0.9, 0.5, 0.2],
+        'b2': [0.999, 0.9, 0.5]
+    }
 
-best_param_sgd_sigmoid = hyperparameter_tuning(sigmoid_model,  optimizer="sgd", criterion=MSE(
-), epochs=50, batch_size=100, sample_size=1000, rounds=10, **model_params_sgd)
+    best_param_adam_relu = hyperparameter_tuning(relu_model, optimizer="adam", criterion=MSE(
+    ), epochs=100, batch_size=100, sample_size=1000, rounds=10, **model_params_adam)
 
-with open('best_param_sgd_sigmoid.txt', 'w') as file:
-    json.dump(best_param_sgd_sigmoid, file)
+    with open('best_param_adam_relu.txt', 'w') as file:
+        json.dump(best_param_adam_relu, file)
+    best_param_adam_tanh = hyperparameter_tuning(tanh_model, optimizer="adam", criterion=MSE(
+    ), epochs=100, batch_size=100, sample_size=1000, rounds=10, **model_params_adam)
+    with open('best_param_adam_tanh.txt', 'w') as file:
+        json.dump(best_param_adam_tanh, file)
+
+    best_param_adam_sigmoid = hyperparameter_tuning(sigmoid_model,  optimizer="adam", criterion=MSE(
+    ), epochs=100, batch_size=100, sample_size=1000, rounds=10, **model_params_adam)
+
+    with open('best_param_adam_sigmoid.txt', 'w') as file:
+        json.dump(best_param_adam_sigmoid, file)
