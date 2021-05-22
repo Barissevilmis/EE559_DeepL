@@ -1,6 +1,4 @@
-from typing import Optional, Callable
 from losses import MSE
-import math
 from torch import empty
 
 
@@ -101,7 +99,7 @@ class AdamOptimizer(_Optimizer_):
     Optimize by step(): decrease by learning rate * gradient
     '''
 
-    def __init__(self, model, epochs=100, criterion=MSE(), batch_size=1, lr=1e-1, beta1 = 0.9, beta2 = 0.999, weight_decay = 0.0, epsilon = 1e-8):
+    def __init__(self, model, epochs=100, criterion=MSE(), batch_size=1, lr=1e-1, beta1=0.9, beta2=0.999, weight_decay=0.0, epsilon=1e-8):
 
         if(lr < 0.0):
             self.lr = 5e-1
@@ -114,7 +112,7 @@ class AdamOptimizer(_Optimizer_):
             self.beta1 = 0.9
             print("Beta1 set to default (0.9) due to negative beta1 input!")
         else:
-            self.beta1= beta1
+            self.beta1 = beta1
 
         if(beta2 < 0.0):
             self.beta2 = 0.999

@@ -1,6 +1,4 @@
-from torch import empty
 import json
-import math
 from models import Linear, Sequential
 from activations import ReLU, Tanh, Sigmoid
 from losses import MSE

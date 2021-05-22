@@ -1,8 +1,6 @@
 import torch
-import json
-import math
 from models import Linear, Sequential
-from activations import ReLU, Tanh, Sigmoid
+from activations import ReLU, Sigmoid
 from losses import MSE
 from utils import generate_set, compute_nb_errors
 from optimizers import SGDOptimizer
