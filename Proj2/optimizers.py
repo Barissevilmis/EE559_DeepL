@@ -97,7 +97,8 @@ class SGDOptimizer(_Optimizer_):
 
         if(lr < 0.0):
             self.lr = 1e-2
-            print("Learning rate set to default (1e-2) due to negative learning rate input!")
+            print(
+                "Learning rate set to default (1e-2) due to negative learning rate input!")
         else:
             self.lr = lr
 

@@ -51,31 +51,19 @@ def preprocess_dataset(train_input, train_target, train_classes, test_input, tes
     return train_dataset, test_dataset
 
 
-def compute_nb_errors(model, data_input, data_target, batch_size=100):
+def compute_nb_errors(model, data_input, data_target):
     '''
     Calculate the number of errors given a model, data input, data target and mini batch size.
     Taken from practical exercises
     '''
 
-    nb_data_errors = 0
+    output = model(data_input)
 
-    for b in range(0, data_input.size(0), batch_size):
-        output = model(data_input.narrow(0, b, batch_size))
+    # If the model is AUXN handle it differently
+    if type(model).__name__ == "AuxiliaryNet":
+        output = output[0]
 
-        pred = d1 = d2 = None
-
-        # If the model is AUXN handle it differently
-        if type(model).__name__ == "AuxiliaryNet":
-            pred, d1, d2 = output
-        else:
-            pred = output
-
-        _, predicted_classes = torch.max(pred, 1)
-        for k in range(batch_size):
-            if data_target[b + k] != predicted_classes[k]:
-                nb_data_errors += 1
-
-    return nb_data_errors
+    return (data_target != torch.argmax(output, 1)).sum(0)
 
 
 def train_model(model, train_dataset, val_dataset, criterion, epochs=100, **model_hyperparams):
@@ -143,11 +131,11 @@ def train_model(model, train_dataset, val_dataset, criterion, epochs=100, **mode
         train_losses[epoch] = epoch_loss
 
         train_error = compute_nb_errors(
-            model, train_dataset.get_data(), train_dataset.get_target(), batch_size=100)
+            model, train_dataset.get_data(), train_dataset.get_target())
         train_acc[epoch] = 1-(train_error/train_dataset.get_size())
 
         val_error = compute_nb_errors(
-            model, val_dataset.get_data(), val_dataset.get_target(), batch_size=100)
+            model, val_dataset.get_data(), val_dataset.get_target())
         val_acc[epoch] = 1-(val_error/val_dataset.get_size())
 
     model.train(False)
