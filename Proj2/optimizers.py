@@ -9,13 +9,14 @@ class _Optimizer_:
     Optimizer: Superclass for Adam and SGD
     '''
 
-    def __init__(self, model, epochs, criterion, batch_size, lr):
+    def __init__(self, model, epochs, criterion, batch_size, lr, optim_method):
 
         self.model = model
         self.criterion = criterion
         self.epochs = None
         self.batch_size = None
         self.lr = None
+
         if epochs <= 0:
             print("Epoch must be greater than 0, set to default of 50!")
             self.epochs = 50
@@ -31,6 +32,9 @@ class _Optimizer_:
             self.lr = 1e-2
         else:
             self.lr = float(lr)
+        
+        if optim_method == 'adam':
+            self.model.init_adam()
 
     def train(self, train_input, train_target):
 
@@ -86,7 +90,7 @@ class SGDOptimizer(_Optimizer_):
         else:
             self.batch_size = batch_size
 
-        super().__init__(model, epochs, criterion, batch_size, lr)
+        super().__init__(model, epochs, criterion, batch_size, lr, ['sgd'])
 
     def step(self):
         for (w, b, gw, gb) in self.model.param():
@@ -101,12 +105,12 @@ class AdamOptimizer(_Optimizer_):
     Optimize by step(): decrease by learning rate * gradient
     '''
 
-    def __init__(self, model, epochs=100, criterion=MSE(), batch_size=1, lr=1e-1, beta1 = 0.9, beta2 = 0.999, weight_decay = 0.0, epsilon = 1e-8):
+    def __init__(self, model, epochs=100, criterion=MSE(), batch_size=1, lr=1e-2, beta1 = 0.9, beta2 = 0.999, weight_decay = 0.0, eps = 1e-8):
 
         if(lr < 0.0):
-            self.lr = 5e-1
+            self.lr = 1e-2
             print(
-                "Learning rate set to default (5e-1) due to negative learning rate input!")
+                "Learning rate set to default (1e-2) due to negative learning rate input!")
         else:
             self.lr = lr
 
@@ -128,19 +132,38 @@ class AdamOptimizer(_Optimizer_):
         else:
             self.weight_decay = weight_decay
 
-        if(epsilon < 0.0):
-            self.epsilon = 1e-8
+        if(eps < 0.0):
+            self.eps = 1e-8
             print("Epsilon set to default (1e-8) due to negative epsilon input!")
         else:
-            self.epsilon = epsilon
+            self.eps = eps
 
         if(batch_size < 0):
             self.batch_size = 1
             print("Mini batch size set to default (1) due to negative batch size input!")
         else:
             self.batch_size = batch_size
+        self.step_size = 0
 
-        super().__init__(model, epochs, criterion, batch_size, lr)
-
+        super().__init__(model, epochs, criterion, batch_size, lr, 'adam')
+        
     def step(self):
-        self.model.step(self.lr)
+
+        for (w, b, gw, gb, mw, mb, vw, vb) in self.model.param():
+
+            mw = self.beta1 * mw + (1-self.beta1) * gw.clone()
+            mb = self.beta1 * mb + (1-self.beta1) * gb.clone()
+
+            vw = self.beta2 * vw + (1-self.beta2) * (gw.clone() ** 2) 
+            vb = self.beta2 * vb + (1-self.beta2) * (vb.clone() ** 2)
+
+            mw_corr = mw / (1 - (self.beta1 ** self.step_size))
+            mb_corr = mb / (1 - (self.beta1 ** self.step_size))
+
+            vw_corr = vw / (1 - (self.beta2 ** self.step_size))
+            vb_corr = vb / (1 - (self.beta2 ** self.step_size))
+
+            w -= ((self.lr * mw_corr) / (vw_corr.sqrt() + self.eps))
+            b -= ((self.lr * mb_corr) / (vb_corr.sqrt() + self.eps))
+
+        self.step_size += 1

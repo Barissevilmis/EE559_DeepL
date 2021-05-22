@@ -7,6 +7,7 @@ class Linear(Module):
     def __init__(self, *model_params):
 
         self.model_params = model_params
+        self.is_adam = False
 
         if model_params[0] < 0.0:
             print('Input neuron size must be positive, set to default 20!')
@@ -33,6 +34,17 @@ class Linear(Module):
 
     def __call__(self, *inpt):
         return self.forward(*inpt)
+    
+    def init_adam(self):
+        self.is_adam = True
+        self.m_moment_weights = empty((
+            self.input_neurons, self.output_neurons)).zero_()
+        self.v_moment_weights = empty((
+            self.input_neurons, self.output_neurons)).zero_()
+        self.m_moment_bias = empty((
+            1, self.output_neurons)).zero_()
+        self.v_moment_bias = empty((
+            1, self.output_neurons)).zero_()
 
     def forward(self, *inpt):
 
@@ -53,12 +65,11 @@ class Linear(Module):
 
     def param(self):
         res = list()
-        res.append((self.weights, self.bias, self.grad_weights, self.grad_bias))
+        if not self.is_adam:
+            res.append((self.weights, self.bias, self.grad_weights, self.grad_bias))
+        else:
+            res.append((self.weights, self.bias, self.grad_weights, self.grad_bias, self.m_moment_weights, self.m_moment_bias, self.v_moment_weights, self.v_moment_bias))
         return res
-
-    def step(self, lr):
-        self.weights -= lr*self.grad_weights
-        self.bias -= lr*self.grad_bias
 
     def reset(self):
         self.zero_grad()
@@ -89,9 +100,6 @@ class Sequential(Module):
         for layer in self.network_structure:
             layer.zero_grad()
 
-    def step(self, lr):
-        for layer in self.network_structure:
-            layer.step(lr)
 
     def param(self):
         res = list()
