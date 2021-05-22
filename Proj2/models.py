@@ -34,7 +34,7 @@ class Linear(Module):
 
     def __call__(self, *inpt):
         return self.forward(*inpt)
-    
+
     def init_adam(self):
         self.is_adam = True
         self.m_moment_weights = empty((
@@ -66,14 +66,18 @@ class Linear(Module):
     def param(self):
         res = list()
         if not self.is_adam:
-            res.append((self.weights, self.bias, self.grad_weights, self.grad_bias))
+            res.append((self.weights, self.bias,
+                       self.grad_weights, self.grad_bias))
         else:
-            res.append((self.weights, self.bias, self.grad_weights, self.grad_bias, self.m_moment_weights, self.m_moment_bias, self.v_moment_weights, self.v_moment_bias))
+            res.append((self.weights, self.bias, self.grad_weights, self.grad_bias,
+                       self.m_moment_weights, self.m_moment_bias, self.v_moment_weights, self.v_moment_bias))
         return res
 
     def reset(self):
         self.zero_grad()
         self.__init__(*self.model_params)
+        if self.is_adam:
+            self.init_adam()
 
 
 class Sequential(Module):
@@ -99,7 +103,6 @@ class Sequential(Module):
     def zero_grad(self):
         for layer in self.network_structure:
             layer.zero_grad()
-
 
     def param(self):
         res = list()
