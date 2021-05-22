@@ -1,53 +1,45 @@
-import json
+from Dataset import DataSet
 import FC
 import CNN
 import AUXN
-import torch
 import torch.nn as nn
-from utils import count_parameters, tune_model
-import hyperparam
+from utils import count_parameters, train_model, generate_dataset
 
-
+(train_input, train_target, train_classes), (test_input,
+                                             test_target, test_classes) = generate_dataset(sample_size=1000)
+train_dataset = DataSet(train_input, train_target, train_classes)
+test_dataset = DataSet(test_input, test_target, test_classes)
 criterion = nn.CrossEntropyLoss()
-user_input_fc = input("Would you like to tune DenseNet? (Y/N)")
-user_input_cnn = input("Would you like to tune ConvNet? (Y/N)")
-user_input_aux = input("Would you like to tune AuxiliaryNet? (Y/N)")
 
-if user_input_fc == "Y":
-    # Model FC
-    model = FC.DenseNet()
-    print(f"Number of trainable parameters: {count_parameters(model)}")
-    best_hyperparams, best_train_loss, best_train_acc, best_val_acc = tune_model(
-        model, criterion, 50, 15, **hyperparam.HYPERPARAMS)
-    print(best_hyperparams, best_train_loss, best_train_acc, best_val_acc)
-    with open('best_hyperparams_fc.txt', 'w') as file:
-        json.dump(best_hyperparams, file)
-    torch.save(best_train_loss, 'best_train_loss_fc.pt')
-    torch.save(best_train_acc, 'best_train_acc_fc.pt')
-    torch.save(best_val_acc, 'best_val_acc_fc.pt')
+print("\n\nFully connected dense network:\n\n")
+model = FC.DenseNet()
+print(f"Number of trainable parameters: {count_parameters(model)}")
+model_hyperparams = {"lr": 0.05, "weight_decay": 0.0001,
+                     "batch_size": 100, "aux_param": 0}
+train_losses, train_acc, val_acc = train_model(model, train_dataset, test_dataset,
+                                               criterion, epochs=100, **model_hyperparams)
+print(f"Train loss: {train_losses[-1].item()}")
+print(f"Train accuracy: {train_acc[-1].item()}")
+print(f"Validation accuracy: {val_acc[-1].item()}")
 
-if user_input_cnn == "Y":
-    # Model CNN
-    model = CNN.ConvNet()
-    print(f"Number of trainable parameters: {count_parameters(model)}")
-    best_hyperparams, best_train_loss, best_train_acc, best_val_acc = tune_model(
-        model, criterion, 50, 15, **hyperparam.HYPERPARAMS)
-    print(best_hyperparams, best_train_loss, best_train_acc, best_val_acc)
-    with open('best_hyperparams_cnn.txt', 'w') as file:
-        json.dump(best_hyperparams, file)
-    torch.save(best_train_loss, 'best_train_loss_cnn.pt')
-    torch.save(best_train_acc, 'best_train_acc_cnn.pt')
-    torch.save(best_val_acc, 'best_val_acc_cnn.pt')
+print("\n\nConvolutional neural network:\n\n")
+model = CNN.ConvNet()
+print(f"Number of trainable parameters: {count_parameters(model)}")
+model_hyperparams = {"lr": 0.0005, "weight_decay": 0.001,
+                     "batch_size": 100, "aux_param": 0}
+train_losses, train_acc, val_acc = train_model(model, train_dataset, test_dataset,
+                                               criterion, epochs=100, **model_hyperparams)
+print(f"Train loss: {train_losses[-1].item()}")
+print(f"Train accuracy: {train_acc[-1].item()}")
+print(f"Validation accuracy: {val_acc[-1].item()}")
 
-if user_input_aux == "Y":
-    # Model AUXN
-    model = AUXN.AuxiliaryNet()
-    print(f"Number of trainable parameters: {count_parameters(model)}")
-    best_hyperparams, best_train_loss, best_train_acc, best_val_acc = tune_model(
-        model, criterion, 50, 15, **hyperparam.HYPERPARAMS)
-    print(best_hyperparams, best_train_loss, best_train_acc, best_val_acc)
-    with open('best_hyperparams_auxn.txt', 'w') as file:
-        json.dump(best_hyperparams, file)
-    torch.save(best_train_loss, 'best_train_loss_auxn.pt')
-    torch.save(best_train_acc, 'best_train_acc_auxn.pt')
-    torch.save(best_val_acc, 'best_val_acc_auxn.pt')
+print("\n\nAuxiliary network:\n\n")
+model = AUXN.AuxiliaryNet()
+print(f"Number of trainable parameters: {count_parameters(model)}")
+model_hyperparams = {"lr": 0.005, "weight_decay": 0.0001,
+                     "batch_size": 100, "aux_param": 0.2}
+train_losses, train_acc, val_acc = train_model(model, train_dataset, test_dataset,
+                                               criterion, epochs=100, **model_hyperparams)
+print(f"Train loss: {train_losses[-1].item()}")
+print(f"Train accuracy: {train_acc[-1].item()}")
+print(f"Validation accuracy: {val_acc[-1].item()}")
