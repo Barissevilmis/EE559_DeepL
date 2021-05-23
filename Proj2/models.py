@@ -7,7 +7,7 @@ class Linear(Module):
     '''
     This module implements Linear / Dense / Fully Connected layer.
     __init__():  - A default dense layer is set as 20 input and 20 output neurons: User should specify the neuron amount(in + out) as constructer argument
-                 - Xavier initialization used as default initializarion
+                 - Uniform initialization used as default initializarion
     init_adam(): - SGD or Adam optimizer could be picked as optimizers -> In case of Adam: create variables for m and v moment parameters for both bias and weights
     forward():   - (__call__(): enables model() to be act as model.forward()): f(x_i) = x_i * W + b
     backward():  - Backward propagation: Grad(f(x_i)) = Grad(x_i+1) * W^T
@@ -34,7 +34,7 @@ class Linear(Module):
 
         super().__init__()
 
-        # Always use Xavier initialization
+        # Always use standard uniform initialization
         self.weights = empty(
             (self.input_neurons, self.output_neurons)).uniform_(-1/math.sqrt(self.input_neurons), +1/math.sqrt(self.input_neurons))
         self.bias = empty((1, self.output_neurons)).zero_()
