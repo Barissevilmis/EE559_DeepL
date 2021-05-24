@@ -20,9 +20,9 @@ class ReLU(Module):
 
     def backward(self, *gradwrtoutput):
 
-        id = self.out.clone()
-        id[id > 0.0] = 1.0
-        return id * gradwrtoutput[0].clone()
+        relu = self.out.clone()
+        relu[relu > 0.0] = 1.0
+        return relu * gradwrtoutput[0].clone()
 
 
 class Sigmoid(Module):
