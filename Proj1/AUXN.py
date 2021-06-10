@@ -25,6 +25,7 @@ class AuxiliaryNet(nn.Module):
         self.denseclassnet = DenseClassificationNet()
 
     def forward(self, x):
+        # We use dimension 1 since dimension 0 is for the batch size, i.e. our input is something like 100x2x14x14
         digit1, digit2 = x.split(split_size=1, dim=1)
         digit1 = self.convclassnet(digit1)
         digit2 = self.convclassnet(digit2)
